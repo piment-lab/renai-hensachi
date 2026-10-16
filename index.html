@@ -2,8 +2,9 @@
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>恋愛偏差値判定</title>
+
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Kaisei+Decol:wght@400;700&family=Zen+Kaku+Gothic+New:wght@400;500;700;900&display=swap">
 <style>
 /*
@@ -33,7 +34,6 @@
   color-scheme:dark;
 }
 *{box-sizing:border-box}
-html,body{margin:0;padding:0}
 body{
   background:var(--bg); color:var(--ink);
   padding-left:max(16px, env(safe-area-inset-left,0px));
@@ -41,7 +41,6 @@ body{
   padding-block:28px;
   display:flex; justify-content:center;
 }
-img{max-width:100%}
 .sheet{
   width:100%; max-width:520px;
   background:var(--bg-card);
@@ -291,6 +290,7 @@ img{max-width:100%}
 </head>
 <body>
 
+
 <div class="sheet">
   <div class="sheet-head">
     <h1>恋愛偏差値判定</h1>
@@ -411,6 +411,7 @@ img{max-width:100%}
       {key:"balance", label:"お金の使い方にメリハリがある"}
     ]},
     {key:"look", label:"容姿", items:[
+      {key:"overall", label:"顔立ち・雰囲気がカッコいい/可愛い・美人（総合的な魅力）"},
       {key:"style", label:"スタイル・体型を維持している"},
       {key:"fashion", label:"ファッションセンスがある"},
       {key:"muscle", label:"筋肉質で引き締まった体つきをしている"}
@@ -429,10 +430,7 @@ img{max-width:100%}
       {key:"care", label:"異性の反応を見ながら自分の言動を調整できる"},
       {key:"cook", label:"料理が得意（ネタ要素・根拠薄め）"}
     ]},
-    {key:"exp", label:"恋愛経験値", items:[
-      {key:"history", label:"これまでの交際経験が豊富"},
-      {key:"advice", label:"恋愛相談に乗れるくらい場数を踏んでいる"}
-    ]}
+    {key:"exp", label:"恋愛経験値", items:[]}
   ];
   // Real national survey baselines (2019 国民健康・栄養調査 for height;
   // 2007 AIST 曝露係数 for weight, the only weight SD found) so that
@@ -487,13 +485,46 @@ img{max-width:100%}
       '</div>';
     },
     look: function(prefix){
+      var heightField = '<label class="profile-field"><span>身長(cm)</span><input type="number" min="130" max="210" value="165" id="'+prefix+'height"></label>';
+      if(prefix === "crush_"){
+        // 相手の正確な体重は分からない前提なので、数値ではなく
+        // 見た目の印象（体型）で評価する。
+        return '<div class="mini-grid">' +
+          heightField +
+          '<label class="profile-field"><span>体型の印象</span>' +
+            '<select id="'+prefix+'build">' +
+              '<option value="4.3">スリム・細め</option>' +
+              '<option value="5" selected>標準体型</option>' +
+              '<option value="2.8">ややぽっちゃり</option>' +
+              '<option value="1.5">ぽっちゃり・太め</option>' +
+            '</select>' +
+          '</label>' +
+        '</div>' +
+        '<p class="section-note" style="margin-top:-4px">身長偏差値 <b id="'+prefix+'heightHensachi">—</b>（同性の全国平均との統計的な差で、高い/低いが優劣という意味ではありません。体重は分からない前提なので「体型の印象」で評価します）</p>';
+      }
       return '<div class="mini-grid">' +
-        '<label class="profile-field"><span>身長(cm)</span><input type="number" min="130" max="210" value="165" id="'+prefix+'height"></label>' +
+        heightField +
         '<label class="profile-field"><span>体重(kg)</span><input type="number" min="30" max="150" value="55" id="'+prefix+'weight"></label>' +
       '</div>' +
       '<p class="section-note" style="margin-top:-4px">身長偏差値 <b id="'+prefix+'heightHensachi">—</b>　体重偏差値 <b id="'+prefix+'weightHensachi">—</b>（同性の全国平均との統計的な差で、高い/低いが優劣という意味ではありません）</p>';
     },
     exp: function(prefix){
+      if(prefix === "crush_"){
+        // 相手の交際人数・告白歴は分からない前提なので、見た目や雰囲気
+        // から感じる「モテそう度」一本で評価する。
+        return '<div class="mini-grid" style="grid-template-columns:1fr">' +
+          '<label class="profile-field"><span>モテそう度（パッと見の印象）</span>' +
+            '<select id="'+prefix+'motesou">' +
+              '<option value="1">全然モテてなさそう</option>' +
+              '<option value="2">あまりモテてなさそう</option>' +
+              '<option value="3" selected>普通</option>' +
+              '<option value="4">結構モテてそう</option>' +
+              '<option value="5">かなりモテてそう・争奪戦になりそう</option>' +
+            '</select>' +
+          '</label>' +
+        '</div>' +
+        '<p class="section-note" style="margin-top:-4px">交際人数や告白歴は分からない前提なので、印象だけで評価します。この値は争奪戦レベルの判定にも使われます。</p>';
+      }
       return '<div class="mini-grid" style="grid-template-columns:1fr 1fr">' +
         '<label class="profile-field"><span>交際人数</span>' +
           '<select id="'+prefix+'history_count">' +
@@ -509,10 +540,11 @@ img{max-width:100%}
         '<label class="profile-field"><span>告白された回数</span><input type="number" min="0" max="50" value="1" id="'+prefix+'confessed_by"></label>' +
         '<label class="profile-field"><span>告白した回数</span><input type="number" min="0" max="50" value="1" id="'+prefix+'confessed_to"></label>' +
       '</div>' +
-      '<p class="section-note" style="margin-top:-4px">告白された回数は「市場での需要」の目安として、相手の場合は争奪戦レベルの判定にも使われます。</p>';
+      '<p class="section-note" style="margin-top:-4px">告白された回数は「市場での需要」の目安として使われます。</p>';
     },
     money: function(prefix){
-      return '<div id="'+prefix+'eduWrap" class="mini-grid">' +
+      var isCrush = prefix === "crush_";
+      var html = '<div id="'+prefix+'eduWrap" class="mini-grid">' +
         '<label class="profile-field"><span>大学ランク</span>' +
           '<select id="'+prefix+'uni_tier">' +
             '<option value="5">旧帝大・一橋・東工大クラス</option>' +
@@ -548,11 +580,27 @@ img{max-width:100%}
             '<option value="3">その他</option>' +
           '</select>' +
         '</label>' +
-      '</div>' +
-      '<div id="'+prefix+'incomeWrap" class="mini-grid" style="grid-template-columns:1fr">' +
-        '<label class="profile-field"><span>年収（万円）</span><input type="number" min="0" max="3000" step="10" value="350" id="'+prefix+'income"></label>' +
-      '</div>' +
-      '<p class="section-note" id="'+prefix+'incomeNote" style="margin-top:-4px"></p>' +
+      '</div>';
+      if(isCrush){
+        // 相手の正確な年収は分からない前提なので、数値ではなく
+        // お金の使い方の印象で評価する。
+        html += '<div id="'+prefix+'incomeWrap" class="mini-grid" style="grid-template-columns:1fr">' +
+          '<label class="profile-field"><span>お金の使い方の印象</span>' +
+            '<select id="'+prefix+'money_impression">' +
+              '<option value="5">かなり太っ腹・奢ってくれそう</option>' +
+              '<option value="4">余裕がありそう</option>' +
+              '<option value="3" selected>普通</option>' +
+              '<option value="2">やや渋そう</option>' +
+              '<option value="1">かなりケチそう</option>' +
+            '</select>' +
+          '</label>' +
+        '</div>';
+      } else {
+        html += '<div id="'+prefix+'incomeWrap" class="mini-grid" style="grid-template-columns:1fr">' +
+          '<label class="profile-field"><span>年収（万円）</span><input type="number" min="0" max="3000" step="10" value="350" id="'+prefix+'income"></label>' +
+        '</div>';
+      }
+      html += '<p class="section-note" id="'+prefix+'incomeNote" style="margin-top:-4px"></p>' +
       '<div id="'+prefix+'carWrap" class="mini-grid" style="grid-template-columns:1fr">' +
         '<label class="profile-field"><span>車</span>' +
           '<select id="'+prefix+'car">' +
@@ -563,6 +611,7 @@ img{max-width:100%}
         '</label>' +
       '</div>' +
       '<p class="section-note" style="margin-top:-4px">学歴・職種ランクは「結婚したい職業ランキング」等、車の項目は婚活女性アンケート（所有男性に魅力を感じる人が7割超）の調査傾向を参考にした目安です（学生/非学生・性別で自動的に出し分けます）。</p>';
+      return html;
     }
   };
 
@@ -676,17 +725,28 @@ img{max-width:100%}
     return score;
   }
 
+  // 相手の体型は数値ではなく「体型の印象」セレクトで直接スコア化する。
+  function buildImpressionScore(prefix){
+    var el = document.getElementById(prefix + "build");
+    return el ? Number(el.value) : 3;
+  }
+
   function refreshBodyHensachi(prefix){
     var hEl = document.getElementById(prefix + "heightHensachi");
-    var wEl = document.getElementById(prefix + "weightHensachi");
-    if(!hEl || !wEl) return;
+    if(!hEl) return;
     hEl.textContent = heightInfo(prefix).hensachi;
-    wEl.textContent = weightInfo(prefix).hensachi;
+    var wEl = document.getElementById(prefix + "weightHensachi");
+    if(wEl) wEl.textContent = weightInfo(prefix).hensachi;
   }
   function refreshIncomeNote(prefix){
     var el = document.getElementById(prefix + "incomeNote");
+    if(!el) return;
+    if(prefix === "crush_"){
+      el.textContent = "正確な年収は分からない前提で、「お金の使い方の印象」だけで経済力カテゴリに反映します。";
+      return;
+    }
     var incomeEl = document.getElementById(prefix + "income");
-    if(!el || !incomeEl) return;
+    if(!incomeEl) return;
     el.textContent = "年収偏差値 " + incomeInfo(prefix).hensachi +
       "（同性の20代平均との統計的な差。標準偏差は公的データが見つからず推定値）";
   }
@@ -781,6 +841,12 @@ img{max-width:100%}
   }
 
   function incomeInfo(prefix){
+    if(prefix === "crush_"){
+      // 相手の正確な年収は分からない前提。「お金の使い方の印象」
+      // （1〜5の主観スケール）をそのままスコアとして使う。
+      var impEl = document.getElementById(prefix + "money_impression");
+      return {hensachi: null, score: impEl ? Number(impEl.value) : 3};
+    }
     var gender = document.getElementById(prefix + "gender").value;
     var stats = INCOME_STATS[gender] || INCOME_STATS["その他"];
     var val = Number(document.getElementById(prefix + "income").value) || 0;
@@ -830,15 +896,19 @@ img{max-width:100%}
       t.items.forEach(function(item){
         // 筋肉質の項目は女性には出していないので採点からも外す
         if(item.key === "muscle" && gender === "女性") return;
-        rawSum += Number(document.getElementById(prefix + t.key + "_" + item.key).value);
-        count += 1;
+        var val = Number(document.getElementById(prefix + t.key + "_" + item.key).value);
+        // 「カッコいい/可愛い」は容姿カテゴリの中でもウェイトを重めにする
+        var itemWeight = item.key === "overall" ? 2 : 1;
+        rawSum += val * itemWeight;
+        count += itemWeight;
       });
       if(t.key === "talk" && isStudent){
         rawSum += Number(document.getElementById(prefix + "community").value);
         count += 1;
       }
       if(t.key === "look"){
-        rawSum += heightInfo(prefix).score + bodyBalanceScore(prefix);
+        rawSum += heightInfo(prefix).score;
+        rawSum += prefix === "crush_" ? buildImpressionScore(prefix) : bodyBalanceScore(prefix);
         count += 2;
         var youth = youthScore(prefix);
         if(youth !== null){
@@ -847,9 +917,15 @@ img{max-width:100%}
         }
       }
       if(t.key === "exp"){
-        rawSum += partnerCountScore(prefix) + datingYearsScore(prefix) +
-                  confessedByScore(prefix) + confessedToScore(prefix);
-        count += 4;
+        if(prefix === "crush_"){
+          var motesouEl = document.getElementById(prefix + "motesou");
+          rawSum += motesouEl ? Number(motesouEl.value) : 3;
+          count += 1;
+        } else {
+          rawSum += partnerCountScore(prefix) + datingYearsScore(prefix) +
+                    confessedByScore(prefix) + confessedToScore(prefix);
+          count += 4;
+        }
       }
       if(t.key === "money"){
         var edu = eduJobInfo(prefix);
@@ -1108,10 +1184,11 @@ img{max-width:100%}
     var selfH = hensachi(selfSum);
     var crushH = hensachi(crushSum);
     var competeLevel = Number(compete.value);
-    // 相手が「告白された回数」多めなら、スペック上の偏差値とは別に、
-    // 単純に競合が多く争奪戦になりやすいという前提で難易度を上乗せする。
-    var crushDemand = Number(document.getElementById("crush_confessed_by").value) || 0;
-    var demandPenalty = Math.min(15, crushDemand * 1.5);
+    // 相手の「モテそう度」印象が平均より高いなら、スペック上の偏差値とは
+    // 別に、単純に競合が多く争奪戦になりやすいという前提で難易度を上乗せする。
+    var motesouEl = document.getElementById("crush_motesou");
+    var crushDemand = motesouEl ? Number(motesouEl.value) : 3;
+    var demandPenalty = Math.max(0, (crushDemand - 3) * 5);
     var diff = (crushH - selfH) + (competeLevel - 3) * 5 + demandPenalty;
     var g = pickGrade(diff);
 
@@ -1158,6 +1235,7 @@ img{max-width:100%}
       "「" + lastResult.title + "」\n" +
       "恋愛偏差値：自分" + lastResult.selfH + " vs 相手" + lastResult.crushH + "\n" +
       "得意分野は「" + CATEGORY_LABEL[lastResult.top] + "」💘\n" +
+      "あなたも診断してみて→ https://piment-lab.github.io/renai-hensachi/\n" +
       "#恋愛偏差値判定";
     function showCopied(){ statusEl.textContent = "コピーしました（LINEやXに貼り付けてどうぞ）"; }
     function showManual(){ statusEl.textContent = "自動コピーできなかったので、下のテキストを選択してコピーしてください"; }
@@ -1180,5 +1258,6 @@ img{max-width:100%}
   }catch(e){}
 })();
 </script>
+
 </body>
 </html>
