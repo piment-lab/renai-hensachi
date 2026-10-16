@@ -1,0 +1,1184 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>恋愛偏差値判定</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Kaisei+Decol:wght@400;700&family=Zen+Kaku+Gothic+New:wght@400;500;700;900&display=swap">
+<style>
+/*
+  Layout: single "answer sheet" card — exam-header row, two ruled fill-in
+  sections (自分/相手), a big judge button, then a hanko-stamp grade reveal
+  with a report-card style score breakdown and a teacher's-comment box.
+*/
+:root{
+  --bg:#EDF2F6; --bg-card:#FFFFFF; --ink:#1F2A3C; --ink-soft:#5B6B7F;
+  --rule:#C3CEDA; --stamp:#C2362B; --stamp-ink:#FFFFFF; --accent-soft:#DCE6EE;
+  --track:#D4DEE7; --shadow:0 1px 0 rgba(31,42,60,.06);
+  font-family:"Zen Kaku Gothic New",sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#11151C; --bg-card:#1B212B; --ink:#E7ECF2; --ink-soft:#9AA7B6;
+    --rule:#3A4452; --stamp:#FF6B5B; --stamp-ink:#1B212B; --accent-soft:#232C38;
+    --track:#2A3340; --shadow:0 1px 0 rgba(0,0,0,.3);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#11151C; --bg-card:#1B212B; --ink:#E7ECF2; --ink-soft:#9AA7B6;
+  --rule:#3A4452; --stamp:#FF6B5B; --stamp-ink:#1B212B; --accent-soft:#232C38;
+  --track:#2A3340; --shadow:0 1px 0 rgba(0,0,0,.3);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--bg); color:var(--ink);
+  padding-left:max(16px, env(safe-area-inset-left,0px));
+  padding-right:max(16px, env(safe-area-inset-right,0px));
+  padding-block:28px;
+  display:flex; justify-content:center;
+}
+img{max-width:100%}
+.sheet{
+  width:100%; max-width:520px;
+  background:var(--bg-card);
+  border:1px solid var(--rule);
+  border-radius:10px;
+  overflow:hidden;
+  box-shadow:0 10px 30px -18px rgba(31,42,60,.4);
+}
+.sheet-head{
+  padding:18px 20px 14px;
+  border-bottom:3px double var(--rule);
+  display:flex; align-items:baseline; justify-content:space-between; gap:12px;
+}
+.sheet-head h1{
+  font-family:"Kaisei Decol",serif;
+  font-size:22px; margin:0; letter-spacing:.02em;
+}
+.sheet-head .sub{
+  font-size:11px; color:var(--ink-soft); letter-spacing:.08em;
+}
+.name-row{
+  display:flex; align-items:center; gap:8px; padding:12px 20px;
+  border-bottom:1px solid var(--rule); font-size:13px; color:var(--ink-soft);
+}
+.name-row input{
+  flex:1; min-width:0; border:none; border-bottom:1px solid var(--rule);
+  background:transparent; color:var(--ink); font:inherit; font-size:14px;
+  padding:4px 2px; font-family:"Zen Kaku Gothic New",sans-serif;
+}
+.name-row input:focus{outline:none; border-bottom-color:var(--stamp)}
+
+.profile-grid{
+  display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px;
+  margin-bottom:12px;
+}
+.profile-field{display:flex; flex-direction:column; gap:3px}
+.profile-field span{font-size:10.5px; color:var(--ink-soft)}
+.profile-field input, .profile-field select{
+  font:inherit; font-size:13px; color:var(--ink);
+  background:var(--accent-soft); border:1px solid var(--rule);
+  border-radius:6px; padding:6px 6px; font-family:"Zen Kaku Gothic New",sans-serif;
+  min-width:0;
+}
+.profile-field select{appearance:auto}
+.mini-grid{
+  display:grid; grid-template-columns:1fr 1fr; gap:8px;
+  margin:4px 0 10px;
+}
+.mini-grid .profile-field input, .mini-grid .profile-field select{padding:5px 6px}
+.hide{display:none!important}
+
+.section{padding:18px 20px 6px}
+.section-title{
+  display:flex; align-items:center; gap:8px;
+  font-family:"Kaisei Decol",serif; font-size:15px; font-weight:700;
+  margin:0 0 4px;
+}
+.section-title .badge{
+  width:22px; height:22px; border-radius:50%;
+  background:var(--accent-soft); color:var(--ink);
+  display:flex; align-items:center; justify-content:center;
+  font-size:11px; font-family:"Zen Kaku Gothic New",sans-serif; font-weight:700;
+}
+.section-note{font-size:11.5px; color:var(--ink-soft); margin:0 0 14px}
+
+.trait-group{margin-bottom:6px}
+.trait-head{
+  font-size:11.5px; font-weight:700; color:var(--stamp);
+  letter-spacing:.04em; margin:12px 0 2px; padding-bottom:3px;
+  border-bottom:1px solid var(--rule);
+}
+.trait-group:first-child .trait-head{margin-top:0}
+.row{
+  display:grid; grid-template-columns:1fr 34px;
+  grid-template-areas:"label val" "slider slider";
+  align-items:center; gap:2px 10px;
+  padding:8px 0 10px; border-bottom:1px dashed var(--rule);
+}
+.row:last-of-type{border-bottom:none}
+.row label{font-size:12.5px; color:var(--ink); grid-area:label; line-height:1.4}
+.row input[type=range]{grid-area:slider}
+.row .val{grid-area:val}
+.row input[type=range]{
+  width:100%; appearance:none; height:4px; border-radius:2px;
+  background:var(--track); outline:none; margin:0;
+}
+.row input[type=range]::-webkit-slider-thumb{
+  appearance:none; width:16px; height:16px; border-radius:50%;
+  background:var(--stamp); border:2px solid var(--bg-card);
+  box-shadow:0 0 0 1px var(--stamp); cursor:pointer;
+}
+.row input[type=range]::-moz-range-thumb{
+  width:16px; height:16px; border-radius:50%;
+  background:var(--stamp); border:2px solid var(--bg-card);
+  box-shadow:0 0 0 1px var(--stamp); cursor:pointer;
+}
+.row .val{
+  font-variant-numeric:tabular-nums; text-align:right;
+  font-size:13px; font-weight:700; color:var(--stamp);
+}
+
+.extra-row{
+  display:flex; flex-direction:column; gap:6px; padding:10px 0 4px;
+}
+.extra-row .row-head{display:flex; justify-content:space-between; font-size:13px}
+.extra-row .row-head .val{font-variant-numeric:tabular-nums; font-weight:700; color:var(--stamp)}
+
+.judge-wrap{padding:20px; padding-top:8px}
+.judge-btn{
+  width:100%; border:none; cursor:pointer;
+  background:var(--stamp); color:var(--stamp-ink);
+  font-family:"Kaisei Decol",serif; font-size:17px; font-weight:700;
+  padding:14px; border-radius:14px; letter-spacing:.06em;
+  box-shadow:0 5px 0 0 color-mix(in srgb, var(--stamp) 65%, black);
+  transform:translateY(0);
+  transition:transform .08s ease, box-shadow .08s ease;
+}
+.judge-btn:active{
+  transform:translateY(5px);
+  box-shadow:0 0 0 0 color-mix(in srgb, var(--stamp) 65%, black);
+}
+
+.result{
+  border-top:3px double var(--rule);
+  padding:22px 20px 24px;
+  display:none;
+}
+.result.show{display:block}
+.result.show > *{
+  opacity:0; transform:translateY(8px);
+  animation:revealUp .5s cubic-bezier(.2,.8,.3,1) forwards;
+}
+.result.show > *:nth-child(1){animation-delay:.02s}
+.result.show > *:nth-child(2){animation-delay:.12s}
+.result.show > *:nth-child(3){animation-delay:.22s}
+.result.show > *:nth-child(4){animation-delay:.32s}
+.result.show > *:nth-child(5){animation-delay:.42s}
+.result.show > *:nth-child(6){animation-delay:.5s}
+.result.show > *:nth-child(n+7){animation-delay:.56s}
+@keyframes revealUp{to{opacity:1; transform:translateY(0)}}
+@media (prefers-reduced-motion: reduce){
+  .result.show > *{animation:none; opacity:1; transform:none}
+}
+.result-top{
+  display:flex; align-items:center; gap:18px; margin-bottom:16px;
+}
+.stamp-box{
+  position:relative; width:92px; height:92px; flex:none;
+}
+.stamp-ring{
+  position:absolute; inset:0; border-radius:50%;
+  border:4px solid var(--stamp); color:var(--stamp);
+  display:flex; align-items:center; justify-content:center;
+  font-family:"Kaisei Decol",serif; font-size:44px; font-weight:700;
+  transform:rotate(-8deg) scale(.6); opacity:0;
+  transition:transform .45s cubic-bezier(.2,1.4,.4,1), opacity .25s ease;
+}
+.stamp-ring.pop{transform:rotate(-8deg) scale(1); opacity:1}
+.stamp-ring.glow{animation:glowPulse 1.6s ease-in-out infinite}
+@keyframes glowPulse{
+  0%,100%{box-shadow:0 0 0 0 color-mix(in srgb, var(--stamp) 55%, transparent)}
+  50%{box-shadow:0 0 0 10px color-mix(in srgb, var(--stamp) 0%, transparent)}
+}
+.result-headline{flex:1; min-width:0}
+.result-headline .grade-label{
+  font-size:11px; letter-spacing:.14em; color:var(--ink-soft); margin:0 0 4px;
+}
+.result-headline .diff-title{
+  font-family:"Kaisei Decol",serif; font-size:18px; margin:0; line-height:1.4;
+}
+
+.profile-card{
+  border:1px dashed var(--rule); border-radius:8px;
+  padding:12px 14px; margin:0 0 14px; text-align:center;
+}
+.profile-avatar{display:flex; justify-content:center; margin-bottom:6px; line-height:0}
+.profile-handle{
+  font-family:"Kaisei Decol",serif; font-size:15px; margin:0 0 4px; color:var(--stamp);
+}
+.profile-bio{font-size:12.5px; color:var(--ink); margin:0 0 8px; line-height:1.6}
+.profile-tags{display:flex; gap:6px; justify-content:center; flex-wrap:wrap}
+.profile-tags .tag{
+  font-size:11px; background:var(--accent-soft); color:var(--ink);
+  border-radius:999px; padding:3px 10px;
+}
+
+.verdict-grid{
+  display:grid; grid-template-columns:1fr 1fr; gap:10px;
+  margin:0 0 14px;
+}
+.verdict-col{
+  border:1px solid var(--rule); border-radius:8px; padding:10px 12px;
+  min-width:0;
+}
+.verdict-col.bad{border-color:var(--stamp)}
+.verdict-head{font-size:11.5px; font-weight:700; margin:0 0 6px}
+.verdict-col ul{margin:0; padding-left:16px; font-size:12px; line-height:1.7}
+.verdict-col li{margin-bottom:2px}
+
+.scorecard{
+  display:grid; grid-template-columns:1fr 1fr; gap:10px;
+  margin:14px 0 18px;
+}
+.scorecard .cell{
+  background:var(--accent-soft); border-radius:8px; padding:10px 12px;
+}
+.scorecard .cell .k{font-size:11px; color:var(--ink-soft); margin:0 0 2px}
+.scorecard .cell .v{
+  font-family:"Kaisei Decol",serif; font-size:22px; margin:0;
+  font-variant-numeric:tabular-nums;
+}
+
+.comment-box{
+  border:1px solid var(--rule); border-radius:8px;
+  padding:14px 16px; position:relative; background:var(--bg);
+}
+.comment-box .teacher{
+  font-size:11px; color:var(--ink-soft); letter-spacing:.06em; margin:0 0 6px;
+  display:flex; align-items:center; gap:6px;
+}
+.comment-box .teacher::before{
+  content:""; width:6px; height:6px; border-radius:50%; background:var(--stamp);
+}
+.comment-box p{margin:0; font-size:13.5px; line-height:1.9}
+
+.copy-btn{
+  width:100%; border:1px solid var(--rule); background:var(--accent-soft);
+  color:var(--ink); font:inherit; font-size:13px; font-weight:700;
+  padding:10px; border-radius:14px; cursor:pointer; margin-top:4px;
+  box-shadow:0 4px 0 0 var(--rule);
+  transform:translateY(0);
+  transition:transform .08s ease, box-shadow .08s ease;
+}
+.copy-btn:active{
+  transform:translateY(4px);
+  box-shadow:0 0 0 0 var(--rule);
+}
+.copy-status{
+  text-align:center; font-size:11px; color:var(--stamp);
+  margin:6px 0 0; min-height:14px;
+}
+.footnote{
+  text-align:center; font-size:10.5px; color:var(--ink-soft);
+  margin-top:16px; line-height:1.7;
+}
+</style>
+</head>
+<body>
+
+<div class="sheet">
+  <div class="sheet-head">
+    <h1>恋愛偏差値判定</h1>
+  </div>
+
+  <div class="name-row">
+    受験者名　<input id="selfName" type="text" placeholder="（任意）あなたの名前">
+  </div>
+
+  <div class="section">
+    <p class="section-title"><span class="badge">A</span>自分のステータス</p>
+    <p class="section-note">各項目を5段階でスライド。盛りすぎ注意。</p>
+    <div class="profile-grid">
+      <label class="profile-field"><span>年齢</span><input id="self_age" type="number" min="15" max="99" value="22"></label>
+      <label class="profile-field"><span>性別</span>
+        <select id="self_gender"><option>女性</option><option selected>男性</option><option>その他</option></select>
+      </label>
+      <label class="profile-field"><span>職業</span>
+        <select id="self_job">
+          <option>学生</option><option>社会人</option><option>フリーランス</option>
+          <option>公務員</option><option>経営者</option><option>その他</option>
+        </select>
+      </label>
+    </div>
+    <div id="selfRows"></div>
+  </div>
+
+  <div class="section" style="padding-top:4px">
+    <p class="section-title"><span class="badge">B</span>気になる相手のステータス</p>
+    <p class="section-note">見た感じ・聞いた話で正直に採点。</p>
+    <div class="profile-grid">
+      <label class="profile-field"><span>年齢</span><input id="crush_age" type="number" min="15" max="99" value="22"></label>
+      <label class="profile-field"><span>性別</span>
+        <select id="crush_gender"><option>女性</option><option>男性</option><option>その他</option></select>
+      </label>
+      <label class="profile-field"><span>職業</span>
+        <select id="crush_job">
+          <option>学生</option><option>社会人</option><option>フリーランス</option>
+          <option>公務員</option><option>経営者</option><option>その他</option>
+        </select>
+      </label>
+    </div>
+    <div id="crushRows"></div>
+    <div class="extra-row">
+      <div class="row-head"><span>争奪戦レベル（モテてそう度）</span><span class="val" id="competeVal">3</span></div>
+      <input id="compete" type="range" min="1" max="5" value="3" step="1">
+    </div>
+  </div>
+
+  <div class="judge-wrap">
+    <button class="judge-btn" id="judgeBtn">採　点　す　る</button>
+  </div>
+
+  <div class="result" id="result">
+    <div class="result-top">
+      <div class="stamp-box">
+        <div class="stamp-ring" id="stampRing">S</div>
+      </div>
+      <div class="result-headline">
+        <p class="grade-label">判定結果</p>
+        <p class="diff-title" id="diffTitle">—</p>
+      </div>
+    </div>
+
+    <div class="scorecard">
+      <div class="cell"><p class="k" id="selfTag">あなたの恋愛偏差値</p><p class="v" id="selfScore">—</p></div>
+      <div class="cell"><p class="k" id="crushTag">相手の恋愛偏差値</p><p class="v" id="crushScore">—</p></div>
+    </div>
+
+    <div class="profile-card">
+      <div class="profile-avatar" id="profileAvatar"></div>
+      <p class="profile-handle" id="profileHandle">@—</p>
+      <p class="profile-bio" id="profileBio">—</p>
+      <div class="profile-tags" id="profileTags"></div>
+    </div>
+
+    <div class="verdict-grid">
+      <div class="verdict-col">
+        <p class="verdict-head">◎ 良い点</p>
+        <ul id="goodList"></ul>
+      </div>
+      <div class="verdict-col bad">
+        <p class="verdict-head">× 先生から一言（厳しめ）</p>
+        <ul id="badList"></ul>
+      </div>
+    </div>
+
+    <div class="comment-box">
+      <p class="teacher">先生の講評</p>
+      <p id="partnerComment">—</p>
+    </div>
+
+    <div class="comment-box" style="margin-top:10px">
+      <p class="teacher">今後へのアドバイス</p>
+      <p id="adviceText">—</p>
+    </div>
+
+    <button class="copy-btn" id="copyBtn">結果をコピーする</button>
+    <p class="copy-status" id="copyStatus"></p>
+
+    <p class="footnote">※ あくまで飲み会のネタ用です。本気にしないこと。</p>
+  </div>
+</div>
+
+<script>
+(function(){
+  var TRAITS = [
+    {key:"clean", label:"清潔感", items:[
+      {key:"groom", label:"身だしなみ・服装に気を使っている"},
+      {key:"smell", label:"匂いケア（香水・体臭対策）をしている"}
+    ]},
+    {key:"talk", label:"コミュ力", items:[
+      {key:"first",  label:"初対面でも打ち解け合える"},
+      {key:"listen", label:"聞き上手で話を広げるのが得意"}
+    ]},
+    {key:"money", label:"経済力", items:[
+      {key:"stable", label:"収入・貯蓄に余裕がある"},
+      {key:"balance", label:"お金の使い方にメリハリがある"}
+    ]},
+    {key:"look", label:"容姿", items:[
+      {key:"style", label:"スタイル・体型を維持している"},
+      {key:"fashion", label:"ファッションセンスがある"},
+      {key:"muscle", label:"筋肉質で引き締まった体つきをしている"}
+    ]},
+    {key:"sincere", label:"誠実さ", items:[
+      {key:"promise", label:"約束や時間をきちんと守る"},
+      {key:"honest", label:"嘘をつかず裏表がない"}
+    ]},
+    {key:"humor", label:"ユーモア", items:[
+      {key:"ease", label:"その場を和ませる一言が言える"},
+      {key:"wit", label:"ノリツッコミなど笑いのセンスがある"},
+      {key:"drink", label:"お酒の席で場を盛り上げられる（ネタ要素・根拠薄め）"}
+    ]},
+    {key:"kind", label:"メタ認知力（自己客観視）", items:[
+      {key:"empathy", label:"異性からどう見られているか客観的に把握できている"},
+      {key:"care", label:"異性の反応を見ながら自分の言動を調整できる"},
+      {key:"cook", label:"料理が得意（ネタ要素・根拠薄め）"}
+    ]},
+    {key:"exp", label:"恋愛経験値", items:[
+      {key:"history", label:"これまでの交際経験が豊富"},
+      {key:"advice", label:"恋愛相談に乗れるくらい場数を踏んでいる"}
+    ]}
+  ];
+  // Real national survey baselines (2019 国民健康・栄養調査 for height;
+  // 2007 AIST 曝露係数 for weight, the only weight SD found) so that
+  // 身長偏差値/体重偏差値 are each other's own hensachi, scored by gender.
+  var HEIGHT_STATS = {
+    "男性": {mean:171.5, sd:6.6},
+    "女性": {mean:157.5, sd:5.5},
+    "その他": {mean:164.5, sd:9.5}
+  };
+  var WEIGHT_STATS = {
+    "男性": {mean:64.9, sd:10.7},
+    "女性": {mean:50.7, sd:8.0},
+    "その他": {mean:57.8, sd:12.0}
+  };
+  // 20代の年収統計（doda/くらしの計算機等の2025-2026年調査の平均値を採用）。
+  // 標準偏差の公的データは見つからず、一般的な年収分布の目安から推定した
+  // 値なので、身長・体重ほどの精度はない前提で使う。
+  var INCOME_STATS = {
+    "男性": {mean:380, sd:150},
+    "女性": {mean:320, sd:120},
+    "その他": {mean:350, sd:140}
+  };
+  // Mild category weight bump, drawn from survey tendencies (Appliv 2022:
+  // women rank income above height for an ideal partner; multiple surveys
+  // report appearance weighted more heavily when evaluating women). This
+  // is a nudge, not a rule — see the chat notes for sourcing caveats.
+  var GENDER_WEIGHTS = {
+    "男性": {money: 1.3},
+    "女性": {look: 1.3}
+  };
+  // 学生のモテる基準（キャンパス内の魅力＝容姿・コミュ力・ノリの良さが
+  // 効きやすく、まだ収入で差がつきにくい）と、社会人のモテる基準（結婚を
+  // 視野に入れた「安定性」が効きやすい＝経済力・誠実さ）は別物、という
+  // 前提で分けている。GENDER_WEIGHTSと掛け合わせて使う。
+  var LIFESTAGE_WEIGHTS = {
+    student: {look: 1.15, talk: 1.1, humor: 1.1, money: 0.6},
+    adult:   {money: 1.2, sincere: 1.1}
+  };
+  function lifestageOf(prefix){
+    return document.getElementById(prefix + "job").value === "学生" ? "student" : "adult";
+  }
+
+  var EXTRA_FIELDS = {
+    talk: function(prefix){
+      return '<div id="'+prefix+'communityWrap" class="mini-grid" style="grid-template-columns:1fr">' +
+        '<label class="profile-field"><span>サークル・部活・学生団体などに所属</span>' +
+          '<select id="'+prefix+'community">' +
+            '<option value="4.5">所属している</option>' +
+            '<option value="3" selected>所属していない</option>' +
+          '</select>' +
+        '</label>' +
+      '</div>';
+    },
+    look: function(prefix){
+      return '<div class="mini-grid">' +
+        '<label class="profile-field"><span>身長(cm)</span><input type="number" min="130" max="210" value="165" id="'+prefix+'height"></label>' +
+        '<label class="profile-field"><span>体重(kg)</span><input type="number" min="30" max="150" value="55" id="'+prefix+'weight"></label>' +
+      '</div>' +
+      '<p class="section-note" style="margin-top:-4px">身長偏差値 <b id="'+prefix+'heightHensachi">—</b>　体重偏差値 <b id="'+prefix+'weightHensachi">—</b>（同性の全国平均との統計的な差で、高い/低いが優劣という意味ではありません）</p>';
+    },
+    exp: function(prefix){
+      return '<div class="mini-grid" style="grid-template-columns:1fr 1fr">' +
+        '<label class="profile-field"><span>交際人数</span>' +
+          '<select id="'+prefix+'history_count">' +
+            '<option value="0">0人（未経験）</option>' +
+            '<option value="1.5">1〜2人</option>' +
+            '<option value="4" selected>3〜5人</option>' +
+            '<option value="7">6人以上</option>' +
+          '</select>' +
+        '</label>' +
+        '<label class="profile-field"><span>交際年数（通算）</span><input type="number" min="0" max="30" value="1" id="'+prefix+'dating_years"></label>' +
+      '</div>' +
+      '<div class="mini-grid">' +
+        '<label class="profile-field"><span>告白された回数</span><input type="number" min="0" max="50" value="1" id="'+prefix+'confessed_by"></label>' +
+        '<label class="profile-field"><span>告白した回数</span><input type="number" min="0" max="50" value="1" id="'+prefix+'confessed_to"></label>' +
+      '</div>' +
+      '<p class="section-note" style="margin-top:-4px">告白された回数は「市場での需要」の目安として、相手の場合は争奪戦レベルの判定にも使われます。</p>';
+    },
+    money: function(prefix){
+      return '<div id="'+prefix+'eduWrap" class="mini-grid">' +
+        '<label class="profile-field"><span>大学ランク</span>' +
+          '<select id="'+prefix+'uni_tier">' +
+            '<option value="5">旧帝大・一橋・東工大クラス</option>' +
+            '<option value="4.5">早慶上理クラス</option>' +
+            '<option value="4" selected>GMARCH・関関同立クラス</option>' +
+            '<option value="3">日東駒専・産近甲龍など</option>' +
+            '<option value="2">その他大学・短大・専門</option>' +
+          '</select>' +
+        '</label>' +
+        '<label class="profile-field"><span>学部系統</span>' +
+          '<select id="'+prefix+'faculty">' +
+            '<option value="5">医学科（医師コース）</option>' +
+            '<option value="4.5">看護・薬学・歯学系</option>' +
+            '<option value="4">理工・情報系</option>' +
+            '<option value="4" selected>法・経済・商学系</option>' +
+            '<option value="3">文系（人文・教育等）</option>' +
+            '<option value="3">未定・その他</option>' +
+          '</select>' +
+        '</label>' +
+      '</div>' +
+      '<p class="section-note" id="'+prefix+'eduNote" style="margin-top:-4px"></p>' +
+      '<div id="'+prefix+'jobWrap" class="mini-grid" style="grid-template-columns:1fr">' +
+        '<label class="profile-field"><span>職種</span>' +
+          '<select id="'+prefix+'occupation_type">' +
+            '<option value="5">公務員</option>' +
+            '<option value="5">医師</option>' +
+            '<option value="4.5" selected>大手企業の会社員</option>' +
+            '<option value="4.3">看護師・介護福祉職</option>' +
+            '<option value="4">教員</option>' +
+            '<option value="3.3">中小企業の会社員</option>' +
+            '<option value="3">経営者・役員</option>' +
+            '<option value="2.8">フリーランス・自営業</option>' +
+            '<option value="3">その他</option>' +
+          '</select>' +
+        '</label>' +
+      '</div>' +
+      '<div id="'+prefix+'incomeWrap" class="mini-grid" style="grid-template-columns:1fr">' +
+        '<label class="profile-field"><span>年収（万円）</span><input type="number" min="0" max="3000" step="10" value="350" id="'+prefix+'income"></label>' +
+      '</div>' +
+      '<p class="section-note" id="'+prefix+'incomeNote" style="margin-top:-4px"></p>' +
+      '<div id="'+prefix+'carWrap" class="mini-grid" style="grid-template-columns:1fr">' +
+        '<label class="profile-field"><span>車</span>' +
+          '<select id="'+prefix+'car">' +
+            '<option value="5">自分名義の車を持っている</option>' +
+            '<option value="4">親の車を使える</option>' +
+            '<option value="3" selected>持っていない</option>' +
+          '</select>' +
+        '</label>' +
+      '</div>' +
+      '<p class="section-note" style="margin-top:-4px">学歴・職種ランクは「結婚したい職業ランキング」等、車の項目は婚活女性アンケート（所有男性に魅力を感じる人が7割超）の調査傾向を参考にした目安です（学生/非学生・性別で自動的に出し分けます）。</p>';
+    }
+  };
+
+  function buildRows(container, prefix){
+    var html = "";
+    TRAITS.forEach(function(t){
+      html += '<div class="trait-group"><p class="trait-head">' + t.label + '</p>';
+      if(EXTRA_FIELDS[t.key]) html += EXTRA_FIELDS[t.key](prefix);
+      t.items.forEach(function(item){
+        var id = prefix + t.key + '_' + item.key;
+        var rowHtml = '<div class="row">' +
+          '<label for="'+id+'">'+item.label+'</label>' +
+          '<span class="val" id="'+id+'Val">3</span>' +
+          '<input type="range" min="1" max="5" value="3" step="1" id="'+id+'">' +
+        '</div>';
+        // 筋肉質の項目は女性には出さない（下のtoggle関数で表示/非表示）
+        if(item.key === "muscle") rowHtml = '<div id="'+prefix+'muscleRow">' + rowHtml + '</div>';
+        html += rowHtml;
+      });
+      html += '</div>';
+    });
+    container.innerHTML = html;
+  }
+
+  var selfRows = document.getElementById("selfRows");
+  var crushRows = document.getElementById("crushRows");
+  buildRows(selfRows, "self_");
+  buildRows(crushRows, "crush_");
+
+  function wireSlider(id){
+    var el = document.getElementById(id);
+    var out = document.getElementById(id + "Val");
+    if(!el || !out) return;
+    el.addEventListener("input", function(){ out.textContent = el.value; });
+  }
+  TRAITS.forEach(function(t){
+    t.items.forEach(function(item){
+      wireSlider("self_" + t.key + "_" + item.key);
+      wireSlider("crush_" + t.key + "_" + item.key);
+    });
+  });
+  var compete = document.getElementById("compete");
+  var competeVal = document.getElementById("competeVal");
+  compete.addEventListener("input", function(){ competeVal.textContent = compete.value; });
+
+  function hensachiOf(value, mean, sd){ return 50 + 10 * (value - mean) / sd; }
+  function toFive(h){ return Math.max(1, Math.min(5, 1 + (h - 25) / 12.5)); }
+
+  function heightInfo(prefix){
+    var gender = document.getElementById(prefix + "gender").value;
+    var stats = HEIGHT_STATS[gender] || HEIGHT_STATS["その他"];
+    var val = Number(document.getElementById(prefix + "height").value);
+    var h = hensachiOf(val, stats.mean, stats.sd);
+    // Men: scored directionally (survey: taller skews preferred).
+    // Women: 女性は身長そのものがシビアに評価されにくいという前提で、
+    // 平均的な身長でも高めのベース点になるよう緩いカーブにしてある
+    // （平均=60点スタート、ズレのペナルティも男性より緩やか）。
+    // その他: 明確な方向性データがないので従来どおり平均への近さで評価。
+    var contrib;
+    if(gender === "男性") contrib = h;
+    else if(gender === "女性") contrib = 60 - Math.abs(h - 50) * 0.6;
+    else contrib = 50 - Math.abs(h - 50);
+    return {hensachi: Math.round(h), score: toFive(contrib)};
+  }
+
+  // 女性限定の「若さ」価値。26歳までは満点、そこから緩やかに下がる。
+  // 男性には適用しない（恋愛偏差値の文脈で、年齢の重みが男女で違う
+  // という前提に基づく）。
+  function youthScore(prefix){
+    var gender = document.getElementById(prefix + "gender").value;
+    if(gender !== "女性") return null;
+    var age = Number(document.getElementById(prefix + "age").value) || 26;
+    if(age <= 26) return 5;
+    return Math.max(1, 5 - (age - 26) * 0.25);
+  }
+
+  function weightInfo(prefix){
+    // Informational only (shown as 体重偏差値) — population-relative
+    // position, not used for scoring. See bodyBalanceScore for that.
+    var gender = document.getElementById(prefix + "gender").value;
+    var stats = WEIGHT_STATS[gender] || WEIGHT_STATS["その他"];
+    var val = Number(document.getElementById(prefix + "weight").value);
+    var h = hensachiOf(val, stats.mean, stats.sd);
+    var contrib = 50 - Math.abs(h - 50);
+    return {hensachi: Math.round(h), score: toFive(contrib)};
+  }
+
+  function bodyBalanceScore(prefix){
+    // BMI distance from a healthy-standard midpoint (~21.5). Close to
+    // standard scores near 5; drifting far in either direction doesn't
+    // just flatten at 1 — past a point it actually goes negative, i.e.
+    // it can drag the overall category average down, not just cap it.
+    // 女性は「軽い方向は標準からズレても評価を下げにくく、重い方向は
+    // 下げやすい」非対称カーブにしてある（男性・その他は対称のまま）。
+    // 行き過ぎた痩せすぎにも一応ブレーキはかかるよう、極端域の追加
+    // ペナルティ（下のdiff>6の部分）は方向を問わず効かせている。
+    var gender = document.getElementById(prefix + "gender").value;
+    var h = Number(document.getElementById(prefix + "height").value) / 100;
+    var w = Number(document.getElementById(prefix + "weight").value);
+    if(!h || !w) return 3;
+    var bmi = w / (h * h);
+    var signedDiff = bmi - 21.5;
+    var diff = Math.abs(signedDiff);
+    var score;
+    if(gender === "女性"){
+      score = signedDiff <= 0 ? 5 - diff / 5 : 5 - diff / 2.2;
+    } else {
+      score = 5 - diff / 3;
+    }
+    if(diff > 6) score -= (diff - 6) * 0.5;
+    return score;
+  }
+
+  function refreshBodyHensachi(prefix){
+    var hEl = document.getElementById(prefix + "heightHensachi");
+    var wEl = document.getElementById(prefix + "weightHensachi");
+    if(!hEl || !wEl) return;
+    hEl.textContent = heightInfo(prefix).hensachi;
+    wEl.textContent = weightInfo(prefix).hensachi;
+  }
+  function refreshIncomeNote(prefix){
+    var el = document.getElementById(prefix + "incomeNote");
+    var incomeEl = document.getElementById(prefix + "income");
+    if(!el || !incomeEl) return;
+    el.textContent = "年収偏差値 " + incomeInfo(prefix).hensachi +
+      "（同性の20代平均との統計的な差。標準偏差は公的データが見つからず推定値）";
+  }
+  // 大学ランク＋学部系統から「学歴偏差値」を算出して表示する。uni_tier
+  // は2〜5、facultyは3〜5の範囲なので、合計5〜10を25〜75の偏差値に
+  // 引き伸ばす（他の偏差値表示と同じ考え方）。
+  function eduHensachi(prefix){
+    var uniEl = document.getElementById(prefix + "uni_tier");
+    var facEl = document.getElementById(prefix + "faculty");
+    if(!uniEl || !facEl) return 50;
+    var sum = Number(uniEl.value) + Number(facEl.value);
+    return Math.round(25 + ((sum - 5) / 5) * 50);
+  }
+  function refreshEduNote(prefix){
+    var el = document.getElementById(prefix + "eduNote");
+    if(!el) return;
+    el.textContent = "学歴偏差値 " + eduHensachi(prefix) + "（大学ランク＋学部系統から算出、経済力に反映されます）";
+  }
+  ["self_", "crush_"].forEach(function(prefix){
+    ["height", "weight", "gender"].forEach(function(field){
+      var el = document.getElementById(prefix + field);
+      if(el) el.addEventListener("input", function(){ refreshBodyHensachi(prefix); });
+      if(el) el.addEventListener("change", function(){ refreshBodyHensachi(prefix); });
+    });
+    refreshBodyHensachi(prefix);
+
+    var incomeEl = document.getElementById(prefix + "income");
+    if(incomeEl) incomeEl.addEventListener("input", function(){ refreshIncomeNote(prefix); });
+
+    ["uni_tier", "faculty"].forEach(function(field){
+      var el = document.getElementById(prefix + field);
+      if(el) el.addEventListener("change", function(){ refreshEduNote(prefix); });
+    });
+
+    ["job", "gender"].forEach(function(field){
+      var el = document.getElementById(prefix + field);
+      if(el) el.addEventListener("change", function(){
+        refreshConditionalFields(prefix);
+        refreshIncomeNote(prefix);
+      });
+    });
+    refreshConditionalFields(prefix);
+    refreshIncomeNote(prefix);
+    refreshEduNote(prefix);
+  });
+
+  // 恋愛経験値まわり：このアプリの本題は「恋人ができるかどうか」なので、
+  // 単に経験が多い=スペックが高い、ではなく、各指標の意味を分けて考える。
+  //  - 交際人数／交際年数：関係を続けてこれた実績 → 素直に加点
+  //  - 告白された回数：市場からの需要の強さ。自分のスペックには加点しつつ、
+  //    相手がこれが多い場合は後述のとおり「争奪戦」の難易度にも反映する
+  //  - 告白した回数：行動力の指標として緩やかに加点（下回数=失敗数ではなく
+  //    試行回数として扱う。多すぎても減点はしない）
+  function partnerCountScore(prefix){
+    var count = Number(document.getElementById(prefix + "history_count").value) || 0;
+    var age = Number(document.getElementById(prefix + "age").value) || 20;
+    var base = Math.min(5, 1 + count * 0.6);
+    // 「年齢の割に多すぎる」を緩やかに減点する。15歳を交際開始の目安に、
+    // 年齢が上がるほど許容人数も増える前提で、そのラインを超えた分だけ
+    // 引く（下限は設けない＝度を越すとマイナスにもなり得る）。
+    var datableYears = Math.max(1, age - 15);
+    var expected = datableYears * 0.35;
+    var excess = count - expected;
+    var penalty = excess > 0 ? excess * 0.4 : 0;
+    return base - penalty;
+  }
+  function datingYearsScore(prefix){
+    var years = Number(document.getElementById(prefix + "dating_years").value) || 0;
+    return Math.max(1, Math.min(5, 1 + years * 0.67));
+  }
+  function confessedByScore(prefix){
+    var n = Number(document.getElementById(prefix + "confessed_by").value) || 0;
+    return Math.max(1, Math.min(5, 1 + n * 0.4));
+  }
+  function confessedToScore(prefix){
+    var n = Number(document.getElementById(prefix + "confessed_to").value) || 0;
+    return Math.max(1, Math.min(5, 1 + n * 0.3));
+  }
+
+  // 学歴・勤務先：経済力カテゴリの一部として扱う（「結婚したい職業」調査
+  // 等の傾向を踏まえた大まかな目安。職業欄が学生かどうかで出し分ける）。
+  function eduJobInfo(prefix){
+    var job = document.getElementById(prefix + "job").value;
+    var uni = Number(document.getElementById(prefix + "uni_tier").value);
+    var fac = Number(document.getElementById(prefix + "faculty").value);
+    if(job === "学生"){
+      return {sum: uni + fac, count: 2};
+    }
+    // 社会人も最終学歴を経済力の一部として反映する（学歴＋職種）。
+    var occ = Number(document.getElementById(prefix + "occupation_type").value);
+    return {sum: uni + fac + occ, count: 3};
+  }
+
+  function incomeInfo(prefix){
+    var gender = document.getElementById(prefix + "gender").value;
+    var stats = INCOME_STATS[gender] || INCOME_STATS["その他"];
+    var val = Number(document.getElementById(prefix + "income").value) || 0;
+    var h = hensachiOf(val, stats.mean, stats.sd);
+    // 年収は身長と違って「高いほど良い」という方向性自体に強い異論が
+    // 出にくい項目なので、closeness方式ではなく素直に方向性で加点する。
+    return {hensachi: Math.round(h), score: toFive(h)};
+  }
+
+  function carScore(prefix){
+    return Number(document.getElementById(prefix + "car").value);
+  }
+
+  // 条件付きで出し分ける項目：学歴(学生・社会人どちらも表示)／
+  // 職種・年収(非学生のみ)／コミュニティ所属(学生のみ)／
+  // 車(男性のみ)／筋肉(女性には出さない)
+  function refreshConditionalFields(prefix){
+    var job = document.getElementById(prefix + "job").value;
+    var gender = document.getElementById(prefix + "gender").value;
+    var isStudent = job === "学生";
+
+    var jobWrap = document.getElementById(prefix + "jobWrap");
+    var incomeWrap = document.getElementById(prefix + "incomeWrap");
+    var communityWrap = document.getElementById(prefix + "communityWrap");
+    var carWrap = document.getElementById(prefix + "carWrap");
+    var muscleRow = document.getElementById(prefix + "muscleRow");
+
+    if(jobWrap) jobWrap.classList.toggle("hide", isStudent);
+    if(incomeWrap) incomeWrap.classList.toggle("hide", isStudent);
+    if(communityWrap) communityWrap.classList.toggle("hide", !isStudent);
+    if(carWrap) carWrap.classList.toggle("hide", gender !== "男性");
+    if(muscleRow) muscleRow.classList.toggle("hide", gender === "女性");
+  }
+
+  function sumTraits(prefix){
+    var gender = document.getElementById(prefix + "gender").value;
+    var job = document.getElementById(prefix + "job").value;
+    var isStudent = job === "学生";
+    var genderWeights = GENDER_WEIGHTS[gender] || {};
+    var stageWeights = LIFESTAGE_WEIGHTS[lifestageOf(prefix)] || {};
+    var weightedSum = 0, weightedMin = 0, weightedMax = 0;
+    var categories = {};
+
+    TRAITS.forEach(function(t){
+      var w = (genderWeights[t.key] || 1) * (stageWeights[t.key] || 1);
+      var rawSum = 0, count = 0;
+      t.items.forEach(function(item){
+        // 筋肉質の項目は女性には出していないので採点からも外す
+        if(item.key === "muscle" && gender === "女性") return;
+        rawSum += Number(document.getElementById(prefix + t.key + "_" + item.key).value);
+        count += 1;
+      });
+      if(t.key === "talk" && isStudent){
+        rawSum += Number(document.getElementById(prefix + "community").value);
+        count += 1;
+      }
+      if(t.key === "look"){
+        rawSum += heightInfo(prefix).score + bodyBalanceScore(prefix);
+        count += 2;
+        var youth = youthScore(prefix);
+        if(youth !== null){
+          rawSum += youth;
+          count += 1;
+        }
+      }
+      if(t.key === "exp"){
+        rawSum += partnerCountScore(prefix) + datingYearsScore(prefix) +
+                  confessedByScore(prefix) + confessedToScore(prefix);
+        count += 4;
+      }
+      if(t.key === "money"){
+        var edu = eduJobInfo(prefix);
+        rawSum += edu.sum;
+        count += edu.count;
+        if(!isStudent){
+          rawSum += incomeInfo(prefix).score;
+          count += 1;
+        }
+        if(gender === "男性"){
+          rawSum += carScore(prefix);
+          count += 1;
+        }
+      }
+      categories[t.key] = count ? rawSum / count : 3;
+      weightedSum += rawSum * w;
+      weightedMin += count * 1 * w;
+      weightedMax += count * 5 * w;
+    });
+
+    return {sum: weightedSum, min: weightedMin, max: weightedMax, categories: categories};
+  }
+
+  function hensachi(agg){
+    // Weighted sub-questions mapped onto a classic "hensachi" curve
+    // (50 = average, 25-75 spread), echoing the real exam-score
+    // statistic the app borrows its name from. Penalties (age-vs-partner
+    // count, BMI extremes) can push the raw sum below the nominal floor,
+    // which is intentional — but floor the *display* at 0 so it still
+    // reads as a hensachi instead of a confusing negative number.
+    var raw = 25 + ((agg.sum - agg.min) / (agg.max - agg.min)) * 50;
+    return Math.round(Math.max(0, raw));
+  }
+
+  var GRADES = [
+    {min:-999, max:-15, grade:"S", title:"圧勝ペース。押せば落ちます。", color:true},
+    {min:-15,  max:-5,  grade:"A", title:"かなり有利。自信を持って行くべし。"},
+    {min:-5,   max:5,   grade:"B", title:"五分五分。決め手の一手が鍵。"},
+    {min:5,    max:15,  grade:"C", title:"やや苦戦。距離を詰める工夫が必要。"},
+    {min:15,   max:25,  grade:"D", title:"高嶺の花。長期戦＆差別化が必須。"},
+    {min:25,   max:999, grade:"E", title:"伝説級の難関。まずは友達から。"}
+  ];
+
+  function pickGrade(diff){
+    for(var i=0;i<GRADES.length;i++){
+      if(diff > GRADES[i].min && diff <= GRADES[i].max) return GRADES[i];
+    }
+    return GRADES[GRADES.length-1];
+  }
+
+  function partnerComment(score){
+    if(score >= 70){
+      return "偏差値70超、数字だけ見るとかなりのハイスペック。自分と同格以上を狙っても十分釣り合いが取れるゾーンです。ただし高嶺の花を狙うほど周りの争奪戦も激しくなるので、スペック以外の決め手（誠実さ・会話のテンポ）を磨いておくと勝率が上がります。";
+    }
+    if(score >= 60){
+      return "平均より一歩抜けた優良物件タイプ。背伸びしすぎず、自分を安売りしすぎず、ちょうどいい自信で攻めるのが一番効きます。相性診断でB〜A判定の相手なら十分勝算あり。";
+    }
+    if(score >= 50){
+      return "全体平均に近いゾーン。スペック勝負より「波長が合うか」で選んだほうが長続きします。謙虚さと聞き上手なところが実は一番の武器なので、飾らず等身大で勝負しましょう。";
+    }
+    if(score >= 40){
+      return "伸びしろ十分なゾーン。コミュ力か清潔感、どちらか一つ本気で底上げするだけで偏差値はすぐ上がるタイプです。今は「自分を必要としてくれる相手」を大事にするのが吉。";
+    }
+    return "数字はまだ低めですが、恋愛偏差値は後からいくらでも伸びます。リクルートの調査では20〜40代未婚者の交際未経験率は34.1%と過去最高値（2023年）なので、焦る必要は全くないです。スペックより先に『安心して話せるかどうか』を武器にして、じっくり信頼を積むタイプの相手と相性が良いはずです。";
+  }
+
+  var CATEGORY_LABEL = {
+    clean:"清潔感", talk:"コミュ力", money:"経済力", look:"容姿",
+    sincere:"誠実さ", humor:"ユーモア", kind:"メタ認知力", exp:"恋愛経験値"
+  };
+  var CATEGORY_GOOD = {
+    clean:"清潔感は文句なし。会う前の準備がちゃんと伝わるタイプ。",
+    talk:"会話のテンポが良く、一緒にいて疲れないタイプ。",
+    money:"経済面での安心感があり、将来の話もしやすいタイプ。",
+    look:"見た目の第一印象で損をしないタイプ。",
+    sincere:"誠実さが伝わる、長く付き合える安心感がある。",
+    humor:"場を和ませる力があり、一緒にいて楽しいタイプ。",
+    kind:"異性からの見られ方を客観視できてて、反応に合わせて立ち回れるタイプ。",
+    exp:"場数を踏んでいて、恋愛における立ち回りが上手い。"
+  };
+  var CATEGORY_BAD = {
+    clean:"清潔感、正直まだ甘い。会う前にもう一度鏡を見ること。",
+    talk:"会話が続かない自覚ある？聞き役からやり直し。",
+    money:"経済力、ここは一朝一夕でどうにもならない。焦らず長期戦で。",
+    look:"外見、まだ伸びしろしかない。他が良くてもここで損してる自覚を。",
+    sincere:"誠実さが数字に出てない。有言実行、まずそこから。",
+    humor:"笑いのセンス、正直滑りがち。無理に狙いにいかなくていい。",
+    kind:"異性から自分がどう見えてるか、正直あまり自覚できてない。一度振り返りを。",
+    exp:"経験値不足。場数を踏むところから。失敗を恐れすぎ。"
+  };
+
+  function sortedCategories(categories){
+    return Object.keys(categories).sort(function(a, b){ return categories[b] - categories[a]; });
+  }
+
+  function buildVerdictLists(categories){
+    var order = sortedCategories(categories);
+    var goodEl = document.getElementById("goodList");
+    var badEl = document.getElementById("badList");
+    var good = order.slice(0, 2);
+    var bad = order.slice(-2).reverse();
+    goodEl.innerHTML = good.map(function(k){
+      return "<li><b>" + CATEGORY_LABEL[k] + "</b>：" + CATEGORY_GOOD[k] + "</li>";
+    }).join("");
+    badEl.innerHTML = bad.map(function(k){
+      return "<li><b>" + CATEGORY_LABEL[k] + "</b>：" + CATEGORY_BAD[k] + "</li>";
+    }).join("");
+    return {good: good, bad: bad};
+  }
+
+  function buildAdvice(bad){
+    var weakest = bad[0];
+    return "一番スコアを押し下げてるのは「" + CATEGORY_LABEL[weakest] + "」。ここを1段階（5段階中+1）上げるだけで、全体の偏差値が一番効率よく伸びます。次に弱いのが「" +
+      CATEGORY_LABEL[bad[1]] + "」なので、余裕があればそっちも並行で。逆に得意分野を伸ばすより、苦手の底上げの方がこのスコアでは効果が出やすいです。";
+  }
+
+  // シンプルな記号的似顔絵アバターをSVGで組み立てる。髪色6種×髪型2種×
+  // 表情3種の掛け合わせで36パターン以上を自動生成できるので、30パターン
+  // 分のイラストを個別に用意する代わりに、回答から決まるパラメータで
+  // その場で描く方式にしている。
+  var HAIR_COLORS = ["#2B2118", "#6B4423", "#C97A3D", "#CAA85A", "#8A8F98", "#C9517A"];
+  // 6髪型×6髪色×3表情×メガネ有無 = 200通り超。参考画像くらいの見た目の
+  // 幅を、ファイルを増やさずパラメータの掛け合わせだけで出す。
+  var HAIR_STYLES = {
+    short: function(hc){
+      return '<path d="M -22 -3 Q 0 -31 22 -3 Q 19 -13 0 -15 Q -19 -13 -22 -3 Z" fill="' + hc + '"/>';
+    },
+    spiky: function(hc){
+      return '<path d="M -22 -3 L -17 -25 L -10 -9 L -2 -29 L 5 -8 L 13 -26 L 20 -4 ' +
+        'Q 15 -14 0 -15 Q -16 -14 -22 -3 Z" fill="' + hc + '"/>';
+    },
+    bob: function(hc){
+      return '<path d="M -22 -3 Q -24 13 -18 19 L -14 15 Q -10 8 -9 -7 L 9 -7 Q 10 8 14 15 ' +
+        'L 18 19 Q 24 13 22 -3 Q 19 -15 0 -16 Q -19 -15 -22 -3 Z" fill="' + hc + '"/>';
+    },
+    long: function(hc){
+      return '<path d="M -21 -3 Q -27 22 -17 35 L -13 29 Q -10 10 -8 -7 Z" fill="' + hc + '"/>' +
+        '<path d="M 21 -3 Q 27 22 17 35 L 13 29 Q 10 10 8 -7 Z" fill="' + hc + '"/>' +
+        '<path d="M -22 -3 Q 0 -33 22 -3 Q 18 -15 0 -17 Q -18 -15 -22 -3 Z" fill="' + hc + '"/>';
+    },
+    ponytail: function(hc){
+      return '<path d="M -22 -3 Q 0 -31 22 -3 Q 19 -13 0 -15 Q -19 -13 -22 -3 Z" fill="' + hc + '"/>' +
+        '<path d="M 17 -9 Q 32 -5 27 16 Q 25 25 19 22 Q 23 6 13 -6 Z" fill="' + hc + '"/>';
+    },
+    twintail: function(hc){
+      return '<path d="M -22 -3 Q 0 -31 22 -3 Q 19 -13 0 -15 Q -19 -13 -22 -3 Z" fill="' + hc + '"/>' +
+        '<path d="M -19 -7 Q -31 1 -26 21 Q -24 27 -18 25 Q -21 10 -14 -5 Z" fill="' + hc + '"/>' +
+        '<path d="M 19 -7 Q 31 1 26 21 Q 24 27 18 25 Q 21 10 14 -5 Z" fill="' + hc + '"/>';
+    }
+  };
+  var HAIR_STYLE_KEYS = Object.keys(HAIR_STYLES);
+  var GLASSES = '<g stroke="#1F2A3C" stroke-width="1.8" fill="none">' +
+    '<circle cx="-7" cy="1" r="5.6"/><circle cx="7" cy="1" r="5.6"/><line x1="-1.4" y1="1" x2="1.4" y2="1"/>' +
+    '</g>';
+
+  // 参考に見せてもらったイラスト集の雰囲気（丸い輪郭・太めの線・耳や
+  // 頬の赤みが見える簡易アイコン風）に寄せつつ、形は自前で組んだもの。
+  function avatarSVG(opts){
+    var size = opts.size || 56;
+    var skin = "#FBE3C8", line = "#1F2A3C", hc = opts.hairColor, blush = "#F2A8A1";
+    var mouth = opts.mood === "happy" ? "M -6 3 Q 0 10 6 3"
+      : opts.mood === "sad" ? "M -6 6 Q 0 0 6 6"
+      : "M -6 3 L 6 3";
+    var hairFn = HAIR_STYLES[opts.style] || HAIR_STYLES.short;
+    return '<svg viewBox="-28 -34 56 68" width="' + size + '" height="' + size + '" aria-hidden="true">' +
+      '<ellipse cx="-19" cy="4" rx="3.2" ry="4.2" fill="' + skin + '" stroke="' + line + '" stroke-width="2.6"/>' +
+      '<ellipse cx="19" cy="4" rx="3.2" ry="4.2" fill="' + skin + '" stroke="' + line + '" stroke-width="2.6"/>' +
+      '<circle cx="0" cy="4" r="19" fill="' + skin + '" stroke="' + line + '" stroke-width="2.8"/>' +
+      hairFn(hc) +
+      '<circle cx="-7" cy="1" r="2.3" fill="' + line + '"/>' +
+      '<circle cx="7" cy="1" r="2.3" fill="' + line + '"/>' +
+      '<ellipse cx="-11" cy="9" rx="3" ry="2" fill="' + blush + '" opacity=".55"/>' +
+      '<ellipse cx="11" cy="9" rx="3" ry="2" fill="' + blush + '" opacity=".55"/>' +
+      '<path d="' + mouth + '" transform="translate(0,12)" stroke="' + line + '" stroke-width="2.4" fill="none" stroke-linecap="round"/>' +
+      (opts.glasses ? GLASSES : "") +
+      "</svg>";
+  }
+
+  // 偏差値を0から目標値までカウントアップさせる、よくある診断結果演出。
+  // prefers-reduced-motionのときは即座に確定値を出す。
+  var REDUCE_MOTION = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  function animateCount(el, target, duration){
+    if(REDUCE_MOTION || !window.requestAnimationFrame){ el.textContent = target; return; }
+    var startTime = null;
+    function step(ts){
+      if(!startTime) startTime = ts;
+      var progress = Math.min(1, (ts - startTime) / duration);
+      var eased = 1 - Math.pow(1 - progress, 3);
+      el.textContent = Math.round(target * eased);
+      if(progress < 1) requestAnimationFrame(step);
+      else el.textContent = target;
+    }
+    requestAnimationFrame(step);
+  }
+
+  function moodFromHensachi(h){
+    return h >= 58 ? "happy" : h >= 42 ? "neutral" : "sad";
+  }
+
+  // 性別ごとに「らしい」髪型プールを用意しつつ、どれを選ぶかは回答の
+  // ハッシュ値で決める（固定の1種類にしない＝回答に応じて変わる）。
+  var STYLE_POOL = {
+    "男性": ["short", "spiky", "bob"],
+    "女性": ["long", "bob", "ponytail", "twintail"],
+    "その他": HAIR_STYLE_KEYS
+  };
+  function pickStyle(gender, seed){
+    var pool = STYLE_POOL[gender] || STYLE_POOL["その他"];
+    return pool[seed % pool.length];
+  }
+
+  function buildProfileCard(selfH, categories, name, prefix){
+    var order = sortedCategories(categories);
+    var top = order[0];
+    var display = (name && name.trim()) ? name.trim() : "ゲスト";
+    document.getElementById("profileHandle").textContent = "@" + display + "_" + CATEGORY_LABEL[top];
+    var tier = selfH >= 65 ? "ハイスペ" : selfH >= 50 ? "安定" : selfH >= 40 ? "伸びしろ" : "原石";
+    document.getElementById("profileBio").textContent =
+      "恋愛偏差値" + selfH + "／" + CATEGORY_LABEL[top] + "推しの" + tier + "枠。";
+    document.getElementById("profileTags").innerHTML = order.slice(0, 3).map(function(k){
+      return '<span class="tag">#' + CATEGORY_LABEL[k] + "</span>";
+    }).join("");
+
+    var gender = document.getElementById(prefix + "gender").value;
+    var seed = Math.floor(Object.keys(categories).reduce(function(s, k){ return s + categories[k]; }, 0) * 10);
+    document.getElementById("profileAvatar").innerHTML = avatarSVG({
+      size: 72,
+      hairColor: HAIR_COLORS[seed % HAIR_COLORS.length],
+      style: pickStyle(gender, seed),
+      mood: moodFromHensachi(selfH),
+      glasses: seed % 5 === 0
+    });
+  }
+
+  var resultEl = document.getElementById("result");
+  var stampRing = document.getElementById("stampRing");
+  var diffTitle = document.getElementById("diffTitle");
+  var selfScoreEl = document.getElementById("selfScore");
+  var crushScoreEl = document.getElementById("crushScore");
+  var selfTagEl = document.getElementById("selfTag");
+  var crushTagEl = document.getElementById("crushTag");
+  var partnerCommentEl = document.getElementById("partnerComment");
+
+  function profileTag(prefix){
+    var age = document.getElementById(prefix + "age").value || "?";
+    var gender = document.getElementById(prefix + "gender").value;
+    var job = document.getElementById(prefix + "job").value;
+    return age + "歳・" + job + "・" + gender;
+  }
+
+  var lastResult = null;
+
+  document.getElementById("judgeBtn").addEventListener("click", function(){
+    var selfSum = sumTraits("self_");
+    var crushSum = sumTraits("crush_");
+    var selfH = hensachi(selfSum);
+    var crushH = hensachi(crushSum);
+    var competeLevel = Number(compete.value);
+    // 相手が「告白された回数」多めなら、スペック上の偏差値とは別に、
+    // 単純に競合が多く争奪戦になりやすいという前提で難易度を上乗せする。
+    var crushDemand = Number(document.getElementById("crush_confessed_by").value) || 0;
+    var demandPenalty = Math.min(15, crushDemand * 1.5);
+    var diff = (crushH - selfH) + (competeLevel - 3) * 5 + demandPenalty;
+    var g = pickGrade(diff);
+
+    animateCount(selfScoreEl, selfH, 700);
+    animateCount(crushScoreEl, crushH, 700);
+    selfTagEl.textContent = profileTag("self_");
+    crushTagEl.textContent = profileTag("crush_");
+    diffTitle.textContent = g.title;
+    partnerCommentEl.textContent = partnerComment(selfH);
+
+    var verdict = buildVerdictLists(selfSum.categories);
+    document.getElementById("adviceText").textContent = buildAdvice(verdict.bad);
+    buildProfileCard(selfH, selfSum.categories, document.getElementById("selfName").value, "self_");
+
+    stampRing.textContent = g.grade;
+    stampRing.classList.remove("pop", "glow");
+    void stampRing.offsetWidth;
+    stampRing.classList.add("pop");
+    if(g.grade === "S" || g.grade === "A") stampRing.classList.add("glow");
+
+    resultEl.classList.remove("show");
+    void resultEl.offsetWidth;
+    resultEl.classList.add("show");
+    resultEl.scrollIntoView({behavior:"smooth", block:"nearest"});
+
+    lastResult = {
+      name: (document.getElementById("selfName").value || "ゲスト").trim() || "ゲスト",
+      grade: g.grade, title: g.title, selfH: selfH, crushH: crushH,
+      top: sortedCategories(selfSum.categories)[0]
+    };
+    document.getElementById("copyStatus").textContent = "";
+
+    try{
+      localStorage.setItem("renai-hensachi-last", JSON.stringify({
+        self: selfSum, crush: crushSum, compete: competeLevel, name: document.getElementById("selfName").value
+      }));
+    }catch(e){}
+  });
+
+  document.getElementById("copyBtn").addEventListener("click", function(){
+    var statusEl = document.getElementById("copyStatus");
+    if(!lastResult){ statusEl.textContent = "先に採点してください"; return; }
+    var text = "【恋愛偏差値判定】" + lastResult.name + "さんの結果は…" + lastResult.grade + "判定！\n" +
+      "「" + lastResult.title + "」\n" +
+      "恋愛偏差値：自分" + lastResult.selfH + " vs 相手" + lastResult.crushH + "\n" +
+      "得意分野は「" + CATEGORY_LABEL[lastResult.top] + "」💘\n" +
+      "#恋愛偏差値判定";
+    function showCopied(){ statusEl.textContent = "コピーしました（LINEやXに貼り付けてどうぞ）"; }
+    function showManual(){ statusEl.textContent = "自動コピーできなかったので、下のテキストを選択してコピーしてください"; }
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).then(showCopied).catch(showManual);
+    } else {
+      showManual();
+    }
+  });
+
+  try{
+    var saved = JSON.parse(localStorage.getItem("renai-hensachi-last") || "null");
+    if(saved){
+      TRAITS.forEach(function(t){
+        // no per-trait storage kept (only sums) — skip restoring sliders,
+        // just restore the name field as a light convenience.
+      });
+      if(saved.name) document.getElementById("selfName").value = saved.name;
+    }
+  }catch(e){}
+})();
+</script>
+</body>
+</html>
