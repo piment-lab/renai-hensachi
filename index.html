@@ -1225,6 +1225,7 @@ body{
       localStorage.setItem("renai-hensachi-last", JSON.stringify({
         self: selfSum, crush: crushSum, compete: competeLevel, name: document.getElementById("selfName").value
       }));
+      localStorage.setItem(INPUTS_KEY, JSON.stringify(collectInputs()));
     }catch(e){}
   });
 
@@ -1246,15 +1247,35 @@ body{
     }
   });
 
+  // 入力欄(スライダー・選択・数値)をid単位で保存/復元する。
+  // 保存対象は名前以外の入力のみ(個人を特定する情報は含めない)。
+  var INPUTS_KEY = "renai-hensachi-inputs";
+  function inputFields(){
+    return Array.prototype.slice.call(document.querySelectorAll(".sheet input[id], .sheet select[id]"))
+      .filter(function(el){ return el.id !== "selfName"; });
+  }
+  function collectInputs(){
+    var o = {};
+    inputFields().forEach(function(el){ o[el.id] = el.value; });
+    return o;
+  }
+  function restoreInputs(o){
+    var fields = inputFields();
+    // 性別・職業などの選択を先に反映し、表示切替(change)が走ってからスライダーを戻す
+    fields.filter(function(el){ return el.type !== "range"; }).concat(
+      fields.filter(function(el){ return el.type === "range"; })
+    ).forEach(function(el){
+      if(!(el.id in o)) return;
+      el.value = o[el.id];
+      el.dispatchEvent(new Event(el.type === "range" ? "input" : "change", {bubbles:true}));
+    });
+  }
+
   try{
     var saved = JSON.parse(localStorage.getItem("renai-hensachi-last") || "null");
-    if(saved){
-      TRAITS.forEach(function(t){
-        // no per-trait storage kept (only sums) — skip restoring sliders,
-        // just restore the name field as a light convenience.
-      });
-      if(saved.name) document.getElementById("selfName").value = saved.name;
-    }
+    if(saved && saved.name) document.getElementById("selfName").value = saved.name;
+    var savedInputs = JSON.parse(localStorage.getItem(INPUTS_KEY) || "null");
+    if(savedInputs && typeof savedInputs === "object") restoreInputs(savedInputs);
   }catch(e){}
 })();
 </script>
