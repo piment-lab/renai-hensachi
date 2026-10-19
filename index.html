@@ -1223,7 +1223,8 @@ body{
 
     try{
       localStorage.setItem("renai-hensachi-last", JSON.stringify({
-        self: selfSum, crush: crushSum, compete: competeLevel, name: document.getElementById("selfName").value
+        self: selfSum, crush: crushSum, compete: competeLevel, name: document.getElementById("selfName").value,
+        fields: collectFields()
       }));
     }catch(e){}
   });
@@ -1246,14 +1247,32 @@ body{
     }
   });
 
+  // 入力欄（名前・プロフィール・スライダー等）の値をidごとに保存／復元する。
+  // 復元は DOM 順（性別→他の項目）で行い、change/input を発火して
+  // 偏差値表示や条件付き項目の表示切替も追従させる。
+  function collectFields(){
+    var out = {};
+    Array.prototype.forEach.call(document.querySelectorAll("input[id], select[id]"), function(el){
+      out[el.id] = el.value;
+    });
+    return out;
+  }
+  function restoreFields(fields){
+    Array.prototype.forEach.call(document.querySelectorAll("input[id], select[id]"), function(el){
+      if(!Object.prototype.hasOwnProperty.call(fields, el.id)) return;
+      var v = fields[el.id];
+      if(typeof v !== "string") return;
+      el.value = v;
+      el.dispatchEvent(new Event("input", {bubbles:true}));
+      el.dispatchEvent(new Event("change", {bubbles:true}));
+    });
+  }
+
   try{
     var saved = JSON.parse(localStorage.getItem("renai-hensachi-last") || "null");
     if(saved){
-      TRAITS.forEach(function(t){
-        // no per-trait storage kept (only sums) — skip restoring sliders,
-        // just restore the name field as a light convenience.
-      });
-      if(saved.name) document.getElementById("selfName").value = saved.name;
+      if(saved.fields) restoreFields(saved.fields);
+      else if(saved.name) document.getElementById("selfName").value = saved.name;
     }
   }catch(e){}
 })();
