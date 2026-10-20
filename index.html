@@ -657,6 +657,20 @@ body{
   var competeVal = document.getElementById("competeVal");
   compete.addEventListener("input", function(){ competeVal.textContent = compete.value; });
 
+  // 数値入力は手入力だとmin/maxを無視できる（空欄・負数・桁違い）ため、
+  // 入力確定時に範囲内へ丸め、空欄は初期値に戻して偏差値の暴走を防ぐ。
+  Array.prototype.forEach.call(document.querySelectorAll('input[type="number"]'), function(el){
+    el.addEventListener("change", function(){
+      var v = parseFloat(el.value);
+      if(isNaN(v)) v = Number(el.defaultValue) || Number(el.min) || 0;
+      v = Math.max(Number(el.min), Math.min(Number(el.max), v));
+      if(String(v) !== el.value){
+        el.value = v;
+        el.dispatchEvent(new Event("input", {bubbles:true}));
+      }
+    });
+  });
+
   function hensachiOf(value, mean, sd){ return 50 + 10 * (value - mean) / sd; }
   function toFive(h){ return Math.max(1, Math.min(5, 1 + (h - 25) / 12.5)); }
 
