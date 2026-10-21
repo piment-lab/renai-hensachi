@@ -104,6 +104,10 @@ body{
   display:flex; align-items:center; justify-content:center;
   font-size:11px; font-family:"Zen Kaku Gothic New",sans-serif; font-weight:700;
 }
+.diff-breakdown{
+  text-align:center; font-size:11.5px; color:var(--ink-soft);
+  margin:-4px 0 12px; line-height:1.7;
+}
 .section-note{font-size:11.5px; color:var(--ink-soft); margin:0 0 14px}
 
 .trait-group{margin-bottom:6px}
@@ -354,6 +358,8 @@ body{
         <p class="diff-title" id="diffTitle">—</p>
       </div>
     </div>
+
+    <p class="diff-breakdown" id="diffBreakdown"></p>
 
     <div class="scorecard">
       <div class="cell"><p class="k" id="selfTag">あなたの恋愛偏差値</p><p class="v" id="selfScore">—</p></div>
@@ -1191,6 +1197,12 @@ body{
     var demandPenalty = Math.max(0, (crushDemand - 3) * 5);
     var diff = (crushH - selfH) + (competeLevel - 3) * 5 + demandPenalty;
     var g = pickGrade(diff);
+    // 判定の根拠を見える化：難易度スコア＝偏差値差＋競合度＋相手の争奪戦。
+    function signed(n){ return (n > 0 ? "+" : "") + n; }
+    document.getElementById("diffBreakdown").textContent =
+      "難易度スコア " + signed(diff) + "（偏差値差 " + signed(crushH - selfH) +
+      "／競合度 " + signed((competeLevel - 3) * 5) +
+      "／相手のモテそう度 " + signed(demandPenalty) + "）　小さいほど有利";
 
     animateCount(selfScoreEl, selfH, 700);
     animateCount(crushScoreEl, crushH, 700);
