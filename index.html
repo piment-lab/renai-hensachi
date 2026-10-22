@@ -282,6 +282,11 @@ body{
   text-align:center; font-size:11px; color:var(--stamp);
   margin:6px 0 0; min-height:14px;
 }
+.stale-note{
+  text-align:center; font-size:12px; font-weight:700; color:var(--stamp);
+  border:1px dashed var(--stamp); border-radius:8px; padding:8px 10px; margin:0 0 14px;
+}
+.result.stale > :not(.stale-note){opacity:.45!important}
 .footnote{
   text-align:center; font-size:10.5px; color:var(--ink-soft);
   margin-top:16px; line-height:1.7;
@@ -345,6 +350,7 @@ body{
   </div>
 
   <div class="result" id="result">
+    <p class="stale-note hide" id="staleNote" role="status">入力が変更されました。この結果は前回の入力のものです。もう一度「採点する」を押してください。</p>
     <div class="result-top">
       <div class="stamp-box">
         <div class="stamp-ring" id="stampRing">S</div>
@@ -1209,6 +1215,8 @@ body{
     stampRing.classList.add("pop");
     if(g.grade === "S" || g.grade === "A") stampRing.classList.add("glow");
 
+    resultEl.classList.remove("stale");
+    document.getElementById("staleNote").classList.add("hide");
     resultEl.classList.remove("show");
     void resultEl.offsetWidth;
     resultEl.classList.add("show");
@@ -1226,6 +1234,19 @@ body{
         self: selfSum, crush: crushSum, compete: competeLevel, name: document.getElementById("selfName").value
       }));
     }catch(e){}
+  });
+
+  // 採点後に入力を変えると表示中の結果が古くなるので、その旨を知らせる。
+  function markStale(){
+    if(!lastResult || resultEl.classList.contains("stale")) return;
+    resultEl.classList.add("stale");
+    document.getElementById("staleNote").classList.remove("hide");
+  }
+  document.querySelector(".sheet").addEventListener("input", function(e){
+    if(!resultEl.contains(e.target)) markStale();
+  });
+  document.querySelector(".sheet").addEventListener("change", function(e){
+    if(!resultEl.contains(e.target)) markStale();
   });
 
   document.getElementById("copyBtn").addEventListener("click", function(){
