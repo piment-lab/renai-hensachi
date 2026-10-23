@@ -815,6 +815,10 @@ body{
   }
   function datingYearsScore(prefix){
     var years = Number(document.getElementById(prefix + "dating_years").value) || 0;
+    // 交際は15歳から始められる前提で、年齢から物理的にあり得る年数を上限にする
+    // （例: 18歳で交際年数30年、のような入力で加点されないようにする）。
+    var age = Number(document.getElementById(prefix + "age").value) || 20;
+    years = Math.min(years, Math.max(0, age - 15));
     return Math.max(1, Math.min(5, 1 + years * 0.67));
   }
   function confessedByScore(prefix){
