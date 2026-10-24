@@ -282,6 +282,12 @@ body{
   text-align:center; font-size:11px; color:var(--stamp);
   margin:6px 0 0; min-height:14px;
 }
+.copy-fallback{
+  display:block; width:100%; box-sizing:border-box; margin-top:8px;
+  min-height:96px; padding:8px; font-size:12px; line-height:1.6;
+  color:var(--ink); border:1px solid var(--rule); border-radius:6px;
+  background:transparent; resize:vertical; font-family:inherit;
+}
 .footnote{
   text-align:center; font-size:10.5px; color:var(--ink-soft);
   margin-top:16px; line-height:1.7;
@@ -390,6 +396,7 @@ body{
 
     <button class="copy-btn" id="copyBtn">結果をコピーする</button>
     <p class="copy-status" id="copyStatus"></p>
+    <textarea class="copy-fallback hide" id="copyFallback" readonly aria-label="コピー用の結果テキスト"></textarea>
 
     <p class="footnote">※ あくまで飲み会のネタ用です。本気にしないこと。</p>
   </div>
@@ -1230,6 +1237,8 @@ body{
 
   document.getElementById("copyBtn").addEventListener("click", function(){
     var statusEl = document.getElementById("copyStatus");
+    var fallbackEl = document.getElementById("copyFallback");
+    fallbackEl.classList.add("hide");
     if(!lastResult){ statusEl.textContent = "先に採点してください"; return; }
     var text = "【恋愛偏差値判定】" + lastResult.name + "さんの結果は…" + lastResult.grade + "判定！\n" +
       "「" + lastResult.title + "」\n" +
@@ -1238,7 +1247,15 @@ body{
       "あなたも診断してみて→ https://piment-lab.github.io/renai-hensachi/\n" +
       "#恋愛偏差値判定";
     function showCopied(){ statusEl.textContent = "コピーしました（LINEやXに貼り付けてどうぞ）"; }
-    function showManual(){ statusEl.textContent = "自動コピーできなかったので、下のテキストを選択してコピーしてください"; }
+    // 自動コピーが使えない環境（非HTTPS・権限拒否など）では、結果テキストを
+    // 選択済みのテキストエリアに出して手動コピーできるようにする。
+    function showManual(){
+      statusEl.textContent = "自動コピーできなかったので、下のテキストを選択してコピーしてください";
+      fallbackEl.value = text;
+      fallbackEl.classList.remove("hide");
+      fallbackEl.focus();
+      fallbackEl.select();
+    }
     if(navigator.clipboard && navigator.clipboard.writeText){
       navigator.clipboard.writeText(text).then(showCopied).catch(showManual);
     } else {
