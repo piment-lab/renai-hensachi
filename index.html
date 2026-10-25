@@ -657,6 +657,21 @@ body{
   var competeVal = document.getElementById("competeVal");
   compete.addEventListener("input", function(){ competeVal.textContent = compete.value; });
 
+  // 数値入力のmin/maxはブラウザ任せだと手入力で簡単に突破できる
+  // （身長0cmや年齢999歳など）ため、入力確定時に範囲へ丸める。
+  // 空欄・数値でない場合は初期値(defaultValue)に戻す。
+  function clampNumberInput(el){
+    var v = parseFloat(el.value);
+    if(isNaN(v)) v = parseFloat(el.defaultValue);
+    var min = parseFloat(el.min), max = parseFloat(el.max);
+    if(!isNaN(min) && v < min) v = min;
+    if(!isNaN(max) && v > max) v = max;
+    el.value = v;
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('input[type="number"]'), function(el){
+    el.addEventListener("change", function(){ clampNumberInput(el); });
+  });
+
   function hensachiOf(value, mean, sd){ return 50 + 10 * (value - mean) / sd; }
   function toFive(h){ return Math.max(1, Math.min(5, 1 + (h - 25) / 12.5)); }
 
@@ -1179,6 +1194,9 @@ body{
   var lastResult = null;
 
   document.getElementById("judgeBtn").addEventListener("click", function(){
+    // Enter直後など change が発火しないまま採点された場合に備えて再度丸める
+    Array.prototype.forEach.call(document.querySelectorAll('input[type="number"]'), clampNumberInput);
+    ["self_", "crush_"].forEach(function(p){ refreshBodyHensachi(p); refreshIncomeNote(p); });
     var selfSum = sumTraits("self_");
     var crushSum = sumTraits("crush_");
     var selfH = hensachi(selfSum);
