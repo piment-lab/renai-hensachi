@@ -389,6 +389,7 @@ body{
     </div>
 
     <button class="copy-btn" id="copyBtn">結果をコピーする</button>
+    <button class="copy-btn hide" id="shareBtn">結果をシェアする</button>
     <p class="copy-status" id="copyStatus"></p>
 
     <p class="footnote">※ あくまで飲み会のネタ用です。本気にしないこと。</p>
@@ -1228,15 +1229,28 @@ body{
     }catch(e){}
   });
 
-  document.getElementById("copyBtn").addEventListener("click", function(){
-    var statusEl = document.getElementById("copyStatus");
-    if(!lastResult){ statusEl.textContent = "先に採点してください"; return; }
-    var text = "【恋愛偏差値判定】" + lastResult.name + "さんの結果は…" + lastResult.grade + "判定！\n" +
+  function shareText(){
+    return "【恋愛偏差値判定】" + lastResult.name + "さんの結果は…" + lastResult.grade + "判定！\n" +
       "「" + lastResult.title + "」\n" +
       "恋愛偏差値：自分" + lastResult.selfH + " vs 相手" + lastResult.crushH + "\n" +
       "得意分野は「" + CATEGORY_LABEL[lastResult.top] + "」💘\n" +
       "あなたも診断してみて→ https://piment-lab.github.io/renai-hensachi/\n" +
       "#恋愛偏差値判定";
+  }
+
+  // 対応ブラウザ（主にスマホ）ではOS標準の共有シートを開くボタンを出す。
+  var shareBtn = document.getElementById("shareBtn");
+  if(navigator.share) shareBtn.classList.remove("hide");
+  shareBtn.addEventListener("click", function(){
+    var statusEl = document.getElementById("copyStatus");
+    if(!lastResult){ statusEl.textContent = "先に採点してください"; return; }
+    navigator.share({text: shareText()}).catch(function(){});
+  });
+
+  document.getElementById("copyBtn").addEventListener("click", function(){
+    var statusEl = document.getElementById("copyStatus");
+    if(!lastResult){ statusEl.textContent = "先に採点してください"; return; }
+    var text = shareText();
     function showCopied(){ statusEl.textContent = "コピーしました（LINEやXに貼り付けてどうぞ）"; }
     function showManual(){ statusEl.textContent = "自動コピーできなかったので、下のテキストを選択してコピーしてください"; }
     if(navigator.clipboard && navigator.clipboard.writeText){
