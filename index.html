@@ -347,11 +347,11 @@ body{
   <div class="result" id="result">
     <div class="result-top">
       <div class="stamp-box">
-        <div class="stamp-ring" id="stampRing">S</div>
+        <div class="stamp-ring" id="stampRing" role="img" aria-label="判定結果">S</div>
       </div>
       <div class="result-headline">
         <p class="grade-label">判定結果</p>
-        <p class="diff-title" id="diffTitle">—</p>
+        <p class="diff-title" id="diffTitle" role="status" aria-live="polite">—</p>
       </div>
     </div>
 
@@ -1204,6 +1204,7 @@ body{
     buildProfileCard(selfH, selfSum.categories, document.getElementById("selfName").value, "self_");
 
     stampRing.textContent = g.grade;
+    stampRing.setAttribute("aria-label", "判定 " + g.grade);
     stampRing.classList.remove("pop", "glow");
     void stampRing.offsetWidth;
     stampRing.classList.add("pop");
