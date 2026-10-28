@@ -61,6 +61,11 @@ body{
 .sheet-head .sub{
   font-size:11px; color:var(--ink-soft); letter-spacing:.08em;
 }
+.theme-btn{
+  border:1px solid var(--rule); background:var(--accent-soft); color:var(--ink);
+  font:inherit; font-size:11px; padding:4px 10px; border-radius:999px; cursor:pointer;
+  flex:none; white-space:nowrap;
+}
 .name-row{
   display:flex; align-items:center; gap:8px; padding:12px 20px;
   border-bottom:1px solid var(--rule); font-size:13px; color:var(--ink-soft);
@@ -294,6 +299,7 @@ body{
 <div class="sheet">
   <div class="sheet-head">
     <h1>恋愛偏差値判定</h1>
+    <button type="button" class="theme-btn" id="themeBtn" aria-label="ライト/ダーク表示を切り替える">🌓 表示切替</button>
   </div>
 
   <div class="name-row">
@@ -397,6 +403,24 @@ body{
 
 <script>
 (function(){
+  // ライト/ダーク切替：未選択ならOS設定（prefers-color-scheme）に従い、
+  // ボタンで選んだ値はlocalStorageに覚えておく。
+  (function(){
+    var root = document.documentElement;
+    var KEY = "renai-hensachi-theme";
+    try{
+      var savedTheme = localStorage.getItem(KEY);
+      if(savedTheme === "light" || savedTheme === "dark") root.setAttribute("data-theme", savedTheme);
+    }catch(e){}
+    document.getElementById("themeBtn").addEventListener("click", function(){
+      var current = root.getAttribute("data-theme") ||
+        (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+      var next = current === "dark" ? "light" : "dark";
+      root.setAttribute("data-theme", next);
+      try{ localStorage.setItem(KEY, next); }catch(e){}
+    });
+  })();
+
   var TRAITS = [
     {key:"clean", label:"清潔感", items:[
       {key:"groom", label:"身だしなみ・服装に気を使っている"},
