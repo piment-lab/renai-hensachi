@@ -163,6 +163,11 @@ body{
   box-shadow:0 0 0 0 color-mix(in srgb, var(--stamp) 65%, black);
 }
 
+.reset-btn{
+  display:block; margin:12px auto 0; background:none; border:none;
+  color:var(--ink-soft); font:inherit; font-size:12px; cursor:pointer;
+  text-decoration:underline; padding:4px 8px;
+}
 .result{
   border-top:3px double var(--rule);
   padding:22px 20px 24px;
@@ -342,6 +347,7 @@ body{
 
   <div class="judge-wrap">
     <button class="judge-btn" id="judgeBtn">採　点　す　る</button>
+    <button class="reset-btn" id="resetBtn" type="button">入力をリセットする</button>
   </div>
 
   <div class="result" id="result">
@@ -1226,6 +1232,32 @@ body{
         self: selfSum, crush: crushSum, compete: competeLevel, name: document.getElementById("selfName").value
       }));
     }catch(e){}
+  });
+
+  // 全入力欄を初期値に戻し、結果表示も閉じる。値の変更は input/change を
+  // 発火して、スライダー数値・偏差値表示・条件付き項目の出し分けに反映する。
+  document.getElementById("resetBtn").addEventListener("click", function(){
+    var fields = document.querySelectorAll(".sheet input, .sheet select");
+    Array.prototype.forEach.call(fields, function(el){
+      if(el.tagName === "SELECT"){
+        var idx = 0;
+        for(var i = 0; i < el.options.length; i++){
+          if(el.options[i].defaultSelected){ idx = i; break; }
+        }
+        el.selectedIndex = idx;
+      } else {
+        el.value = el.defaultValue;
+      }
+    });
+    Array.prototype.forEach.call(fields, function(el){
+      el.dispatchEvent(new Event("input", {bubbles: true}));
+      el.dispatchEvent(new Event("change", {bubbles: true}));
+    });
+    resultEl.classList.remove("show");
+    stampRing.classList.remove("pop", "glow");
+    lastResult = null;
+    document.getElementById("copyStatus").textContent = "";
+    window.scrollTo({top: 0, behavior: "smooth"});
   });
 
   document.getElementById("copyBtn").addEventListener("click", function(){
