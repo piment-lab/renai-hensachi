@@ -815,6 +815,8 @@ body{
   }
   function datingYearsScore(prefix){
     var years = Number(document.getElementById(prefix + "dating_years").value) || 0;
+    // 交際人数が0人（未経験）なら交際年数も0として扱う（矛盾入力で加点されない）
+    if((Number(document.getElementById(prefix + "history_count").value) || 0) === 0) years = 0;
     return Math.max(1, Math.min(5, 1 + years * 0.67));
   }
   function confessedByScore(prefix){
