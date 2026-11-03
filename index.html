@@ -872,10 +872,13 @@ body{
     var incomeWrap = document.getElementById(prefix + "incomeWrap");
     var communityWrap = document.getElementById(prefix + "communityWrap");
     var carWrap = document.getElementById(prefix + "carWrap");
+    var incomeNote = document.getElementById(prefix + "incomeNote");
     var muscleRow = document.getElementById(prefix + "muscleRow");
 
     if(jobWrap) jobWrap.classList.toggle("hide", isStudent);
     if(incomeWrap) incomeWrap.classList.toggle("hide", isStudent);
+    // 学生は年収を採点に使わないので、年収偏差値の注記も隠す
+    if(incomeNote) incomeNote.classList.toggle("hide", isStudent);
     if(communityWrap) communityWrap.classList.toggle("hide", !isStudent);
     if(carWrap) carWrap.classList.toggle("hide", gender !== "男性");
     if(muscleRow) muscleRow.classList.toggle("hide", gender === "女性");
