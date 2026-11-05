@@ -1017,11 +1017,17 @@ body{
     exp:"経験値不足。場数を踏むところから。失敗を恐れすぎ。"
   };
 
+  // 学生は収入がそもそも評価に入らず、学歴・車などで経済力が決まるため、
+  // 社会人向けの「焦らず長期戦」という厳しめコメントは場違いになる。
+  var CATEGORY_BAD_STUDENT = {
+    money:"学生のうちは経済力で差がつきにくい時期。バイトや貯金など、今から積める部分で十分取り返せる。"
+  };
+
   function sortedCategories(categories){
     return Object.keys(categories).sort(function(a, b){ return categories[b] - categories[a]; });
   }
 
-  function buildVerdictLists(categories){
+  function buildVerdictLists(categories, isStudent){
     var order = sortedCategories(categories);
     var goodEl = document.getElementById("goodList");
     var badEl = document.getElementById("badList");
@@ -1031,7 +1037,8 @@ body{
       return "<li><b>" + CATEGORY_LABEL[k] + "</b>：" + CATEGORY_GOOD[k] + "</li>";
     }).join("");
     badEl.innerHTML = bad.map(function(k){
-      return "<li><b>" + CATEGORY_LABEL[k] + "</b>：" + CATEGORY_BAD[k] + "</li>";
+      var msg = (isStudent && CATEGORY_BAD_STUDENT[k]) || CATEGORY_BAD[k];
+      return "<li><b>" + CATEGORY_LABEL[k] + "</b>：" + msg + "</li>";
     }).join("");
     return {good: good, bad: bad};
   }
@@ -1199,7 +1206,7 @@ body{
     diffTitle.textContent = g.title;
     partnerCommentEl.textContent = partnerComment(selfH);
 
-    var verdict = buildVerdictLists(selfSum.categories);
+    var verdict = buildVerdictLists(selfSum.categories, document.getElementById("self_job").value === "学生");
     document.getElementById("adviceText").textContent = buildAdvice(verdict.bad);
     buildProfileCard(selfH, selfSum.categories, document.getElementById("selfName").value, "self_");
 
