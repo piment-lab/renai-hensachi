@@ -1178,7 +1178,32 @@ body{
 
   var lastResult = null;
 
+  // 数値入力の検証：空欄は初期値に戻し、min/max の範囲外はクランプする。
+  // （空欄の身長が0cmとして偏差値計算に入って極端な値になるのを防ぐ）
+  function sanitizeNumberInput(el){
+    var v = parseFloat(el.value);
+    if(isNaN(v)) v = parseFloat(el.defaultValue);
+    if(isNaN(v)) return;
+    var min = parseFloat(el.min), max = parseFloat(el.max);
+    if(!isNaN(min) && v < min) v = min;
+    if(!isNaN(max) && v > max) v = max;
+    el.value = v;
+  }
+  function sanitizeAllNumberInputs(){
+    Array.prototype.forEach.call(document.querySelectorAll('input[type="number"]'), sanitizeNumberInput);
+    ["self_", "crush_"].forEach(refreshBodyHensachi);
+    ["self_", "crush_"].forEach(refreshIncomeNote);
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('input[type="number"]'), function(el){
+    el.addEventListener("change", function(){
+      sanitizeNumberInput(el);
+      ["self_", "crush_"].forEach(refreshBodyHensachi);
+      ["self_", "crush_"].forEach(refreshIncomeNote);
+    });
+  });
+
   document.getElementById("judgeBtn").addEventListener("click", function(){
+    sanitizeAllNumberInputs();
     var selfSum = sumTraits("self_");
     var crushSum = sumTraits("crush_");
     var selfH = hensachi(selfSum);
