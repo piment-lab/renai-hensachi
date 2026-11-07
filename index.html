@@ -1108,9 +1108,13 @@ body{
   // prefers-reduced-motionのときは即座に確定値を出す。
   var REDUCE_MOTION = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   function animateCount(el, target, duration){
+    // 連打で再採点したとき、前回のアニメーションが残って数字が二重に
+    // 書き換えられ（ちらつき・古い値で終わる）ないよう、世代番号で古い方を止める。
+    var token = (el._countToken = (el._countToken || 0) + 1);
     if(REDUCE_MOTION || !window.requestAnimationFrame){ el.textContent = target; return; }
     var startTime = null;
     function step(ts){
+      if(el._countToken !== token) return;
       if(!startTime) startTime = ts;
       var progress = Math.min(1, (ts - startTime) / duration);
       var eased = 1 - Math.pow(1 - progress, 3);
