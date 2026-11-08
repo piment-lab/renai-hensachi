@@ -286,63 +286,204 @@ body{
   text-align:center; font-size:10.5px; color:var(--ink-soft);
   margin-top:16px; line-height:1.7;
 }
+
+/* ===== アプリ風ウィザードUI ===== */
+body{padding-block:0; padding-left:0; padding-right:0; margin:0; min-height:100dvh; align-items:stretch}
+.sheet.app{
+  max-width:480px; min-height:100dvh; border:none; border-radius:0;
+  box-shadow:none; display:flex; flex-direction:column; position:relative;
+  background:var(--bg);
+}
+@media (min-width:560px){
+  body{padding-block:24px}
+  .sheet.app{min-height:0; height:calc(100dvh - 48px); border-radius:24px; border:1px solid var(--rule); box-shadow:0 20px 50px -24px rgba(31,42,60,.45); background:var(--bg-card)}
+}
+.appbar{
+  display:flex; align-items:center; gap:10px; flex:none;
+  padding:max(12px, env(safe-area-inset-top,0px)) 16px 10px;
+}
+.icon-btn{
+  width:40px; height:40px; border-radius:50%; border:none; cursor:pointer;
+  background:var(--accent-soft); color:var(--ink); font-size:24px; line-height:1;
+  display:flex; align-items:center; justify-content:center; flex:none;
+}
+.icon-btn[disabled]{opacity:.3; cursor:default}
+.progress{flex:1; height:8px; background:var(--track); border-radius:99px; overflow:hidden}
+.progress-fill{height:100%; width:0; background:var(--stamp); border-radius:99px; transition:width .35s cubic-bezier(.2,.8,.3,1)}
+.step-count{font-size:11px; color:var(--ink-soft); font-variant-numeric:tabular-nums; min-width:34px; text-align:right}
+.stage{flex:1; overflow-y:auto; padding:8px 20px 24px; -webkit-overflow-scrolling:touch}
+.step{display:none}
+.step.active{display:block; animation:stepIn .32s cubic-bezier(.2,.8,.3,1)}
+.step.active.back{animation-name:stepInBack}
+@keyframes stepIn{from{opacity:0; transform:translateX(24px)} to{opacity:1; transform:none}}
+@keyframes stepInBack{from{opacity:0; transform:translateX(-24px)} to{opacity:1; transform:none}}
+@media (prefers-reduced-motion: reduce){.step.active{animation:none} .progress-fill{transition:none}}
+.hero{text-align:center; padding:28px 0 18px}
+.hero-mark{
+  width:84px; height:84px; margin:0 auto 14px; border-radius:50%;
+  border:4px solid var(--stamp); color:var(--stamp); transform:rotate(-8deg);
+  display:flex; align-items:center; justify-content:center;
+  font-family:"Kaisei Decol",serif; font-size:42px; font-weight:700;
+}
+.hero h1{font-family:"Kaisei Decol",serif; font-size:26px; margin:0 0 10px}
+.hero-sub{font-size:13.5px; line-height:1.8; color:var(--ink-soft); margin:0}
+.hero-sub b{color:var(--ink)}
+.name-card{
+  display:flex; flex-direction:column; gap:6px; font-size:12px; color:var(--ink-soft);
+  background:var(--bg-card); border:1px solid var(--rule); border-radius:16px; padding:14px 16px;
+}
+.name-card input{
+  border:none; background:transparent; color:var(--ink); font:inherit; font-size:16px;
+  padding:4px 0; outline:none; border-bottom:2px solid var(--rule);
+}
+.name-card input:focus{border-bottom-color:var(--stamp)}
+.hint{font-size:12px; color:var(--ink-soft); line-height:1.7; margin:14px 4px 0}
+.who-tag{
+  display:inline-block; font-size:11px; font-weight:700; letter-spacing:.08em;
+  padding:3px 12px; border-radius:99px; margin:10px 0 8px;
+}
+.who-self{background:var(--accent-soft); color:var(--ink)}
+.who-crush{background:var(--stamp); color:var(--stamp-ink)}
+.step-title{font-family:"Kaisei Decol",serif; font-size:22px; margin:0 0 6px; line-height:1.35}
+.step-lead{font-size:12.5px; color:var(--ink-soft); margin:0 0 16px; line-height:1.7}
+.step .profile-grid{grid-template-columns:1fr 1fr 1fr}
+.step .profile-field span{font-size:11px}
+.step .profile-field input, .step .profile-field select{font-size:16px; padding:10px 8px; border-radius:12px; background:var(--bg-card)}
+.step .mini-grid{margin:8px 0 12px}
+.step .section-note{margin:6px 2px 14px}
+.fact-q{
+  background:var(--bg-card); border:1px solid var(--rule); border-radius:18px;
+  padding:14px 14px 10px; margin:0 0 14px;
+}
+.fq-title{font-size:13px; font-weight:700; margin:0 0 10px; color:var(--ink)}
+.chips{display:flex; flex-direction:column; gap:8px; margin-bottom:4px}
+.chip{
+  font:inherit; font-size:13.5px; line-height:1.5; text-align:left; cursor:pointer;
+  display:flex; align-items:flex-start; gap:10px;
+  background:var(--bg); color:var(--ink); border:1.5px solid var(--rule);
+  border-radius:14px; padding:12px 14px; min-height:48px;
+  transition:transform .08s ease, background .15s ease, border-color .15s ease;
+  -webkit-tap-highlight-color:transparent;
+}
+.chip::before{
+  content:""; flex:none; width:20px; height:20px; margin-top:1px; border-radius:50%;
+  border:2px solid var(--rule); background:transparent;
+  transition:background .15s ease, border-color .15s ease;
+}
+.chip:active{transform:scale(.98)}
+.chip[aria-pressed="true"]{
+  background:color-mix(in srgb, var(--stamp) 12%, var(--bg-card));
+  border-color:var(--stamp); font-weight:700;
+}
+.chip[aria-pressed="true"]::before{
+  background:var(--stamp) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M5 10.5l3.2 3.2L15 7' fill='none' stroke='white' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/100% no-repeat;
+  border-color:var(--stamp);
+}
+.chip:focus-visible,.icon-btn:focus-visible,.primary-btn:focus-visible{outline:3px solid var(--stamp); outline-offset:2px}
+.navbar{
+  flex:none; padding:12px 20px max(16px, env(safe-area-inset-bottom,0px));
+  background:linear-gradient(to top, var(--bg) 70%, transparent);
+}
+.primary-btn{
+  width:100%; border:none; cursor:pointer; background:var(--stamp); color:var(--stamp-ink);
+  font-family:"Kaisei Decol",serif; font-size:17px; font-weight:700;
+  padding:15px; border-radius:16px; letter-spacing:.06em;
+  box-shadow:0 5px 0 0 color-mix(in srgb, var(--stamp) 65%, black);
+  transition:transform .08s ease, box-shadow .08s ease;
+}
+.primary-btn:active{transform:translateY(5px); box-shadow:none}
+.app.finished .appbar, .app.finished .stage, .app.finished .navbar{display:none}
+.app.finished .result{border-top:none; overflow-y:auto; padding-top:max(24px, env(safe-area-inset-top,0px))}
+.result{flex:1; background:var(--bg-card)}
+.step .row.hide{display:none}
+.step h1:focus,.step h2:focus{outline:none}
 </style>
 </head>
 <body>
 
 
-<div class="sheet">
-  <div class="sheet-head">
-    <h1>恋愛偏差値判定</h1>
-  </div>
+<div class="sheet app" id="app">
+  <header class="appbar" id="appbar">
+    <button class="icon-btn" id="backBtn" type="button" aria-label="前の質問に戻る">‹</button>
+    <div class="progress" role="progressbar" aria-label="進捗" aria-valuemin="0" aria-valuemax="100" id="progress"><div class="progress-fill" id="progressFill"></div></div>
+    <span class="step-count" id="stepCount"></span>
+  </header>
 
-  <div class="name-row">
-    受験者名　<input id="selfName" type="text" placeholder="（任意）あなたの名前">
-  </div>
+  <main class="stage" id="stage">
+    <section class="step" data-kind="intro">
+      <div class="hero">
+        <p class="hero-mark">恋</p>
+        <h1>恋愛偏差値判定</h1>
+        <p class="hero-sub">飲み会のネタ用診断。<br>自分と気になる相手を<b>「経験したこと・見たこと」</b>だけで答えると、難易度をS〜Eで判定します。</p>
+      </div>
+      <label class="name-card">受験者名（任意）<input id="selfName" type="text" placeholder="ニックネームでOK" autocomplete="off"></label>
+      <p class="hint">所要時間 約3分。主観の自己評価ではなく、「言われたことがある」「やったことがある」などの事実だけをタップしてください。</p>
+    </section>
 
-  <div class="section">
-    <p class="section-title"><span class="badge">A</span>自分のステータス</p>
-    <p class="section-note">各項目を5段階でスライド。盛りすぎ注意。</p>
-    <div class="profile-grid">
-      <label class="profile-field"><span>年齢</span><input id="self_age" type="number" min="15" max="99" value="22"></label>
-      <label class="profile-field"><span>性別</span>
-        <select id="self_gender"><option>女性</option><option selected>男性</option><option>その他</option></select>
-      </label>
-      <label class="profile-field"><span>職業</span>
-        <select id="self_job">
-          <option>学生</option><option>社会人</option><option>フリーランス</option>
-          <option>公務員</option><option>経営者</option><option>その他</option>
-        </select>
-      </label>
-    </div>
-    <div id="selfRows"></div>
-  </div>
+    <section class="step" data-kind="profile" data-who="self">
+      <p class="who-tag who-self">あなた</p>
+      <h2 class="step-title">まずは基本情報</h2>
+      <p class="step-lead">年齢・性別・職業を選んでください。</p>
+      <div class="profile-grid">
+        <label class="profile-field"><span>年齢</span><input id="self_age" type="number" min="15" max="99" value="22" inputmode="numeric"></label>
+        <label class="profile-field"><span>性別</span>
+          <select id="self_gender"><option>女性</option><option selected>男性</option><option>その他</option></select>
+        </label>
+        <label class="profile-field"><span>職業</span>
+          <select id="self_job">
+            <option>学生</option><option>社会人</option><option>フリーランス</option>
+            <option>公務員</option><option>経営者</option><option>その他</option>
+          </select>
+        </label>
+      </div>
+    </section>
+    <div id="selfSlot"></div>
 
-  <div class="section" style="padding-top:4px">
-    <p class="section-title"><span class="badge">B</span>気になる相手のステータス</p>
-    <p class="section-note">見た感じ・聞いた話で正直に採点。</p>
-    <div class="profile-grid">
-      <label class="profile-field"><span>年齢</span><input id="crush_age" type="number" min="15" max="99" value="22"></label>
-      <label class="profile-field"><span>性別</span>
-        <select id="crush_gender"><option>女性</option><option>男性</option><option>その他</option></select>
-      </label>
-      <label class="profile-field"><span>職業</span>
-        <select id="crush_job">
-          <option>学生</option><option>社会人</option><option>フリーランス</option>
-          <option>公務員</option><option>経営者</option><option>その他</option>
-        </select>
-      </label>
-    </div>
-    <div id="crushRows"></div>
-    <div class="extra-row">
-      <div class="row-head"><span>争奪戦レベル（モテてそう度）</span><span class="val" id="competeVal">3</span></div>
-      <input id="compete" type="range" min="1" max="5" value="3" step="1">
-    </div>
-  </div>
+    <section class="step" data-kind="profile" data-who="crush">
+      <p class="who-tag who-crush">気になる相手</p>
+      <h2 class="step-title">相手の基本情報</h2>
+      <p class="step-lead">わかる範囲でOK。ここからは「見たこと・聞いたこと」だけで答えます。</p>
+      <div class="profile-grid">
+        <label class="profile-field"><span>年齢</span><input id="crush_age" type="number" min="15" max="99" value="22" inputmode="numeric"></label>
+        <label class="profile-field"><span>性別</span>
+          <select id="crush_gender"><option selected>女性</option><option>男性</option><option>その他</option></select>
+        </label>
+        <label class="profile-field"><span>職業</span>
+          <select id="crush_job">
+            <option>学生</option><option>社会人</option><option>フリーランス</option>
+            <option>公務員</option><option>経営者</option><option>その他</option>
+          </select>
+        </label>
+      </div>
+    </section>
+    <div id="crushSlot"></div>
 
-  <div class="judge-wrap">
-    <button class="judge-btn" id="judgeBtn">採　点　す　る</button>
-  </div>
+    <section class="step" data-kind="compete" data-who="crush">
+      <p class="who-tag who-crush">気になる相手</p>
+      <h2 class="step-title">ライバルの気配</h2>
+      <p class="step-lead">当てはまる事実だけタップ。</p>
+      <div id="competeSlot"></div>
+      <div class="extra-row hide">
+        <div class="row-head"><span>争奪戦レベル</span><span class="val" id="competeVal">1</span></div>
+        <input id="compete" type="range" min="1" max="5" value="1" step="any">
+      </div>
+    </section>
+
+    <section class="step" data-kind="final">
+      <div class="hero">
+        <p class="hero-mark">判</p>
+        <h2 class="step-title">準備OK！</h2>
+        <p class="hero-sub">全部答えたら判定スタート。</p>
+      </div>
+      <div class="judge-wrap">
+        <button class="judge-btn" id="judgeBtn" type="button">採　点　す　る</button>
+      </div>
+    </section>
+  </main>
+
+  <footer class="navbar" id="navbar">
+    <button class="primary-btn" id="nextBtn" type="button">次へ</button>
+  </footer>
 
   <div class="result" id="result">
     <div class="result-top">
@@ -389,6 +530,7 @@ body{
     </div>
 
     <button class="copy-btn" id="copyBtn">結果をコピーする</button>
+    <button class="copy-btn" id="restartBtn" type="button">もう一度診断する</button>
     <p class="copy-status" id="copyStatus"></p>
 
     <p class="footnote">※ あくまで飲み会のネタ用です。本気にしないこと。</p>
@@ -512,7 +654,7 @@ body{
       if(prefix === "crush_"){
         // 相手の交際人数・告白歴は分からない前提なので、見た目や雰囲気
         // から感じる「モテそう度」一本で評価する。
-        return '<div class="mini-grid" style="grid-template-columns:1fr">' +
+        return '<div class="mini-grid" style="grid-template-columns:1fr;display:none">' +
           '<label class="profile-field"><span>モテそう度（パッと見の印象）</span>' +
             '<select id="'+prefix+'motesou">' +
               '<option value="1">全然モテてなさそう</option>' +
@@ -522,8 +664,7 @@ body{
               '<option value="5">かなりモテてそう・争奪戦になりそう</option>' +
             '</select>' +
           '</label>' +
-        '</div>' +
-        '<p class="section-note" style="margin-top:-4px">交際人数や告白歴は分からない前提なので、印象だけで評価します。この値は争奪戦レベルの判定にも使われます。</p>';
+        '</div>';
       }
       return '<div class="mini-grid" style="grid-template-columns:1fr 1fr">' +
         '<label class="profile-field"><span>交際人数</span>' +
@@ -584,7 +725,7 @@ body{
       if(isCrush){
         // 相手の正確な年収は分からない前提なので、数値ではなく
         // お金の使い方の印象で評価する。
-        html += '<div id="'+prefix+'incomeWrap" class="mini-grid" style="grid-template-columns:1fr">' +
+        html += '<div id="'+prefix+'incomeWrap" class="mini-grid hide" style="grid-template-columns:1fr">' +
           '<label class="profile-field"><span>お金の使い方の印象</span>' +
             '<select id="'+prefix+'money_impression">' +
               '<option value="5">かなり太っ腹・奢ってくれそう</option>' +
@@ -594,7 +735,7 @@ body{
               '<option value="1">かなりケチそう</option>' +
             '</select>' +
           '</label>' +
-        '</div>';
+        '</div></div>';
       } else {
         html += '<div id="'+prefix+'incomeWrap" class="mini-grid" style="grid-template-columns:1fr">' +
           '<label class="profile-field"><span>年収（万円）</span><input type="number" min="0" max="3000" step="10" value="350" id="'+prefix+'income"></label>' +
@@ -615,31 +756,159 @@ body{
     }
   };
 
-  function buildRows(container, prefix){
-    var html = "";
-    TRAITS.forEach(function(t){
-      html += '<div class="trait-group"><p class="trait-head">' + t.label + '</p>';
-      if(EXTRA_FIELDS[t.key]) html += EXTRA_FIELDS[t.key](prefix);
-      t.items.forEach(function(item){
-        var id = prefix + t.key + '_' + item.key;
-        var rowHtml = '<div class="row">' +
-          '<label for="'+id+'">'+item.label+'</label>' +
-          '<span class="val" id="'+id+'Val">3</span>' +
-          '<input type="range" min="1" max="5" value="3" step="1" id="'+id+'">' +
-        '</div>';
-        // 筋肉質の項目は女性には出さない（下のtoggle関数で表示/非表示）
-        if(item.key === "muscle") rowHtml = '<div id="'+prefix+'muscleRow">' + rowHtml + '</div>';
-        html += rowHtml;
+  // ---- 客観的事実で答える質問バンク -------------------------------------
+  // 自己評価（5段階スライダー）ではなく、「〜と言われたことがある」
+  // 「〜したことがある」など事実ベースのチェックリストにする。
+  // 当てはまった数 n / 全項目数 N から、従来の1〜5スコアへ換算して
+  // 裏側の入力欄(range/select)に書き込むので、採点ロジックは共通。
+  //   値 = base + (5 - base) * n / N
+  var FACTS = {
+    self: {
+      "clean_groom": ["月1回以上は美容院・床屋に行く","毎朝、髪型を整えてから出かける","眉・爪・ヒゲなどを定期的に手入れしている","服のシワや汚れを出かける前に確認する"],
+      "clean_smell": ["柔軟剤や香水など、香りに気を使っている","毎日、歯磨き以外のデンタルケアもしている","「いい匂いする」と言われたことがある","汗をかく日は制汗剤やシートを持ち歩く"],
+      "talk_first": ["この3ヶ月で、初対面の人と連絡先を交換した","飲み会で初対面の人の隣でも普通に話せた","友達の友達に、すぐ名前を覚えてもらえた","自分から「どこ住み？」などと話しかけたことが最近ある"],
+      "talk_listen": ["友達から恋愛・悩み相談をされたことがある","「話しやすい」と言われたことがある","相手の話を遮らず最後まで聞くと言われたことがある","会話中に「それでどうなったの？」とよく聞き返す"],
+      "money_stable": ["貯金が50万円以上ある","毎月、収入の1割以上を貯金している","急な3万円の出費が出ても困らない","リボ払い・借金がない"],
+      "money_balance": ["家計簿アプリなどで支出を把握している","月末にお金が足りなくなることは最近ほぼない","食事の場で奢ったことがある","衝動買いで後悔した経験は最近ほぼない"],
+      "look_overall": ["異性に外見を褒められたことがある","芸能人・アーティストに似ていると言われたことがある","街で声をかけられた・スカウトされたことがある","初対面の人に「モテそう」と言われたことがある","SNSに載せた写真に、異性から好意的な反応をもらった"],
+      "look_style": ["週1回以上、運動や筋トレをしている","1年前と体重の変化が±3kg以内","「スタイルいいね」と言われたことがある","服のサイズ選びで困ることが少ない"],
+      "look_fashion": ["「服かわいい／おしゃれ」と言われたことがある","服を買うとき、上下の組み合わせまで考えて選ぶ","SNSや雑誌で最新の服をチェックしている","「いつも同じ服だね」と言われたことがない"],
+      "look_muscle": ["筋トレやスポーツを習慣にしている","「体つきいいね」と言われたことがある","腹筋が割れている・うっすら見える","ジムや運動の記録をつけている"],
+      "sincere_promise": ["待ち合わせに遅刻することはほとんどない","この1年でドタキャンしていない","LINEなどの返信を放置することは少ない","借りた物やお金は期限までに返す"],
+      "sincere_honest": ["「裏表がない」と言われたことがある","その場しのぎの嘘は最近ついていない","陰口の輪に加わらないようにしている","間違えたとき、その場で謝れた経験がある"],
+      "humor_ease": ["場が静かなとき、自分から話題を振ったことがある","自分の失敗談を笑い話にできる","「面白い」と言われたことがある","気まずい空気を和らげられた経験がある"],
+      "humor_wit": ["友達のボケにツッコんで笑いを取ったことがある","SNSや会話で、ウケた一言がある","「ツッコミがうまい」と言われたことがある","お笑い番組・ライブをよく見る"],
+      "humor_drink": ["飲み会で盛り上げ役を任されたことがある","一気コールなしでも場を回せた","二次会に誘われることが多い","幹事を頼まれたことがある"],
+      "kind_empathy": ["異性の友達に、自分の第一印象を聞いたことがある","「最初のイメージと違った」と言われた内容を覚えている","自分の長所と短所を、異性の目線で説明できる","異性から見た自分の「モテる点・モテない点」を人に言われたことがある"],
+      "kind_care": ["相手が疲れていそうなとき、場所や話題を変えたことがある","相手の反応が薄いとき、話題を切り替えた","デートで相手の好みに合わせて店を選んだことがある","相手の歩くペースに合わせて速度を調整する"],
+      "kind_cook": ["週1回以上自炊する","人に手料理を振る舞ったことがある","「料理うまい」と言われたことがある","作れる料理が10品以上ある"]
+    },
+    crush: {
+      "clean_groom": ["髪型がいつも整っている","服にシワや汚れがない","眉や爪などが手入れされている","毎回違う服を着ている"],
+      "clean_smell": ["近くにいて嫌な匂いがしたことがない","「いい香りだな」と思ったことがある","口臭・体臭が気になったことがない"],
+      "talk_first": ["初対面の人と楽しそうに話しているのを見たことがある","飲み会で自分から話しかけているのを見た","誰とでも名前で呼び合って仲良くなっている","新入りの人にも自然に話しかけていた"],
+      "talk_listen": ["人の話に相づちを打って聞いているのを見た","相談を受けているところを見たことがある","話を遮らず最後まで聞いていた","前に聞いた話を覚えていて、後で話題にしてくれた"],
+      "money_stable": ["高価なもの（時計・バッグなど）を身につけている","旅行や趣味にお金をかけている話を聞いた","お金に困っている様子を見たことがない"],
+      "money_balance": ["割り勘や会計のとき、スマートに支払っていた","無駄遣いで困っている話を聞いたことがない","必要な場面では出し惜しみしていなかった"],
+      "look_overall": ["周りが「カッコいい／かわいい」と言っているのを聞いた","芸能人に似ていると言われているのを聞いた","街で声をかけられた話を聞いたことがある","異性が目で追っているのを見たことがある","自分が初対面で「おっ」と思った"],
+      "look_style": ["運動や筋トレをしている話を聞いた","「スタイルいい」と言われているのを聞いた","服が自然に似合っている"],
+      "look_fashion": ["「おしゃれ」と言われているのを聞いた","毎回、服の組み合わせがまとまっている","トレンドの服や小物を持っている"],
+      "look_muscle": ["筋トレやスポーツを習慣にしていると聞いた","「体つきいい」と言われているのを聞いた","半袖や薄着のとき、引き締まって見えた"],
+      "sincere_promise": ["待ち合わせに遅れたことがない","約束をドタキャンされたことがない","LINEの返信が遅くても、ちゃんと返ってくる"],
+      "sincere_honest": ["「裏表がない」と言われているのを聞いた","陰口の輪に加わらないのを見た","間違えたとき素直に謝っていた"],
+      "humor_ease": ["気まずい空気を和らげる一言を言っていた","自分の失敗談を笑い話にしていた","「面白い人」と言われているのを聞いた"],
+      "humor_wit": ["友達のボケにツッコんで笑いを取っていた","SNSや会話でウケている一言を見た","「ツッコミがうまい」と言われているのを聞いた"],
+      "humor_drink": ["飲み会で盛り上げ役をしていた","幹事を任されていたのを見た","二次会に誘われているのを見た"],
+      "kind_empathy": ["「モテる」と言われても、調子に乗らず受け流していた","自分の長所や短所を冗談交じりに話していた","異性からの見られ方について話しているのを聞いた"],
+      "kind_care": ["相手が疲れているとき、場所や話題を変えていた","相手の反応を見て話題を切り替えていた","相手の好みに合わせて店を選んでいた"],
+      "kind_cook": ["料理が得意だという話を聞いた","手料理を振る舞ったと聞いた"]
+    }
+  };
+  // 特殊な裏入力欄(select)用の質問。base=チェック0個のときの値
+  var FACT_EXTRA = {
+    "crush_motesou": {title:"モテている証拠", base:1, facts:["「あの人モテるよね」と言われているのを聞いた","告白された話を聞いたことがある","異性に囲まれているのを見たことがある","SNSで異性からのコメント・いいねが多い"]},
+    "crush_money_impression": {title:"お金まわりの事実", base:2, facts:["奢ってくれた（奢っていた）のを見たことがある","割り勘のとき出し渋らない","旅行や趣味にお金を使っていると聞いた"]},
+    "compete": {title:"ライバルの気配", base:1, facts:["その人が告白されたという話を聞いたことがある","その人を狙っている人がいると聞いた","SNSで異性からの反応が多い","周りから「競争率高い」と言われている","いつも誰かに囲まれている"]}
+  };
+
+  function factQuestionHtml(targetId, title, base, facts){
+    return '<div class="fact-q" data-target="'+targetId+'" data-base="'+base+'">' +
+      '<p class="fq-title">'+title+'</p><div class="chips">' +
+      facts.map(function(f){ return '<button type="button" class="chip" aria-pressed="false">'+f+'</button>'; }).join("") +
+      '</div></div>';
+  }
+  function applyFactQuestion(q){
+    var target = document.getElementById(q.getAttribute("data-target"));
+    if(!target) return;
+    var chips = q.querySelectorAll(".chip");
+    var n = q.querySelectorAll('.chip[aria-pressed="true"]').length;
+    var base = Number(q.getAttribute("data-base")) || 1;
+    var v = base + (5 - base) * n / chips.length;
+    if(target.tagName === "SELECT"){
+      var best = null, bestD = 99;
+      Array.prototype.forEach.call(target.options, function(o){
+        var d = Math.abs(Number(o.value) - v);
+        if(d < bestD){ bestD = d; best = o; }
       });
-      html += '</div>';
-    });
-    container.innerHTML = html;
+      if(best) target.value = best.value;
+    } else {
+      target.value = String(Math.round(v * 100) / 100);
+    }
+    target.dispatchEvent(new Event("input", {bubbles:true}));
+    target.dispatchEvent(new Event("change", {bubbles:true}));
   }
 
-  var selfRows = document.getElementById("selfRows");
-  var crushRows = document.getElementById("crushRows");
-  buildRows(selfRows, "self_");
-  buildRows(crushRows, "crush_");
+  function traitPageHtml(t, prefix){
+    var html = "";
+    var who = prefix === "self_" ? "self" : "crush";
+    t.items.forEach(function(item){
+      var id = prefix + t.key + '_' + item.key;
+      var facts = FACTS[who][t.key + "_" + item.key] || [];
+      // 裏側の入力欄(従来のスライダー)。画面には出さず、チェック結果が入る。
+      var rowHtml = '<div class="row hide">' +
+        '<label for="'+id+'">'+item.label+'</label>' +
+        '<span class="val" id="'+id+'Val">1</span>' +
+        '<input type="range" min="1" max="5" value="1" step="any" id="'+id+'">' +
+      '</div>' + factQuestionHtml(id, item.q || item.label, 1, facts);
+      // 筋肉質の項目は女性には出さない（下のtoggle関数で表示/非表示）
+      if(item.key === "muscle") rowHtml = '<div id="'+prefix+'muscleRow">' + rowHtml + '</div>';
+      html += rowHtml;
+    });
+    return html;
+  }
+
+  var TRAIT_LEAD = {
+    self: {
+      clean:"見た目の「手入れ」に関する事実だけ答えてください。",
+      talk:"最近の実体験でチェックしてください。",
+      money:"数字や行動など、事実で答えます。",
+      look:"自分の感想ではなく、「人から言われたこと」で答えます。",
+      sincere:"普段の行動の事実で答えます。",
+      humor:"実際にあった出来事でチェックしてください。",
+      kind:"異性からの見られ方を、事実ベースで確認します。",
+      exp:"恋愛の経歴を入力してください。"
+    },
+    crush: {
+      clean:"実際に見て・感じたことだけでOK。",
+      talk:"見かけた場面を思い出してチェックしてください。",
+      money:"見たこと・聞いた話で答えます。",
+      look:"周りの反応など、客観的な事実でチェックしてください。",
+      sincere:"これまでに見聞きした事実でOK。",
+      humor:"実際に見かけた場面でチェック。",
+      kind:"その人の言動から分かる事実でチェック。",
+      exp:"周りからの評判など、聞いた話でOK。"
+    }
+  };
+  var TRAIT_EMOJI = {clean:"🧼", talk:"💬", money:"💰", look:"✨", sincere:"🤝", humor:"😆", kind:"🪞", exp:"💘"};
+
+  function buildTraitPages(slot, prefix){
+    var who = prefix === "self_" ? "self" : "crush";
+    var frag = document.createDocumentFragment();
+    TRAITS.forEach(function(t){
+      var sec = document.createElement("section");
+      sec.className = "step";
+      sec.setAttribute("data-kind", "trait");
+      sec.setAttribute("data-who", who);
+      var extra = EXTRA_FIELDS[t.key] ? EXTRA_FIELDS[t.key](prefix) : "";
+      sec.innerHTML = '<p class="who-tag who-'+who+'">'+(who === "self" ? "あなた" : "気になる相手")+'</p>' +
+        '<h2 class="step-title">'+TRAIT_EMOJI[t.key]+' '+t.label+'</h2>' +
+        '<p class="step-lead">'+TRAIT_LEAD[who][t.key]+' 当てはまるものだけタップ（なければ何も選ばなくてOK）。</p>' +
+        extra + traitPageHtml(t, prefix);
+      if(prefix === "crush_" && t.key === "exp"){
+        sec.insertAdjacentHTML("beforeend", factQuestionHtml("crush_motesou", FACT_EXTRA["crush_motesou"].title, FACT_EXTRA["crush_motesou"].base, FACT_EXTRA["crush_motesou"].facts));
+      }
+      if(prefix === "crush_" && t.key === "money"){
+        sec.insertAdjacentHTML("beforeend", factQuestionHtml("crush_money_impression", FACT_EXTRA["crush_money_impression"].title, FACT_EXTRA["crush_money_impression"].base, FACT_EXTRA["crush_money_impression"].facts));
+      }
+      frag.appendChild(sec);
+    });
+    slot.replaceWith(frag);
+  }
+
+  buildTraitPages(document.getElementById("selfSlot"), "self_");
+  buildTraitPages(document.getElementById("crushSlot"), "crush_");
+  document.getElementById("competeSlot").innerHTML =
+    factQuestionHtml("compete", FACT_EXTRA["compete"].title, FACT_EXTRA["compete"].base, FACT_EXTRA["compete"].facts);
 
   function wireSlider(id){
     var el = document.getElementById(id);
@@ -1212,7 +1481,9 @@ body{
     resultEl.classList.remove("show");
     void resultEl.offsetWidth;
     resultEl.classList.add("show");
-    resultEl.scrollIntoView({behavior:"smooth", block:"nearest"});
+    appEl.classList.add("finished");
+    resultEl.scrollTop = 0;
+    window.scrollTo(0, 0);
 
     lastResult = {
       name: (document.getElementById("selfName").value || "ゲスト").trim() || "ゲスト",
@@ -1256,6 +1527,56 @@ body{
       if(saved.name) document.getElementById("selfName").value = saved.name;
     }
   }catch(e){}
+
+  // ---- ウィザード（1画面1テーマで進むアプリ風UI） ---------------------
+  var appEl = document.getElementById("app");
+  var stepEls = Array.prototype.slice.call(document.querySelectorAll("#stage > .step"));
+  var backBtn = document.getElementById("backBtn");
+  var nextBtn = document.getElementById("nextBtn");
+  var progressFill = document.getElementById("progressFill");
+  var progressEl = document.getElementById("progress");
+  var stepCountEl = document.getElementById("stepCount");
+  var stageEl = document.getElementById("stage");
+  var navbarEl = document.getElementById("navbar");
+  var cur = 0;
+
+  function showStep(i, isBack){
+    cur = Math.max(0, Math.min(stepEls.length - 1, i));
+    stepEls.forEach(function(el, idx){
+      el.classList.toggle("active", idx === cur);
+      el.classList.remove("back");
+    });
+    if(isBack) stepEls[cur].classList.add("back");
+    var pct = Math.round(cur / (stepEls.length - 1) * 100);
+    progressFill.style.width = pct + "%";
+    progressEl.setAttribute("aria-valuenow", String(pct));
+    stepCountEl.textContent = (cur + 1) + "/" + stepEls.length;
+    backBtn.disabled = cur === 0;
+    var last = cur === stepEls.length - 1;
+    navbarEl.classList.toggle("hide", last);
+    nextBtn.textContent = cur === 0 ? "はじめる" : "次へ";
+    stageEl.scrollTop = 0;
+    var heading = stepEls[cur].querySelector("h1, h2");
+    if(heading){ heading.setAttribute("tabindex", "-1"); heading.focus({preventScroll:true}); }
+  }
+
+  document.addEventListener("click", function(e){
+    var chip = e.target.closest && e.target.closest(".chip");
+    if(!chip) return;
+    chip.setAttribute("aria-pressed", chip.getAttribute("aria-pressed") === "true" ? "false" : "true");
+    applyFactQuestion(chip.closest(".fact-q"));
+  });
+  nextBtn.addEventListener("click", function(){ showStep(cur + 1, false); });
+  backBtn.addEventListener("click", function(){ showStep(cur - 1, true); });
+  document.getElementById("restartBtn").addEventListener("click", function(){
+    appEl.classList.remove("finished");
+    resultEl.classList.remove("show");
+    showStep(0, true);
+  });
+
+  // 裏側の入力欄を初期状態(チェック0個)に同期してから最初の画面を出す
+  Array.prototype.forEach.call(document.querySelectorAll(".fact-q"), applyFactQuestion);
+  showStep(0, false);
 })();
 </script>
 
